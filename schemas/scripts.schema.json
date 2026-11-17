@@ -1,0 +1,255 @@
+{
+  "$defs": {
+    "Option": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "correct": {
+          "title": "Correct",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "correct"
+      ],
+      "title": "Option",
+      "type": "object"
+    },
+    "Phrase": {
+      "additionalProperties": false,
+      "properties": {
+        "speaker": {
+          "minLength": 1,
+          "title": "Speaker",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "translation": {
+          "minLength": 1,
+          "title": "Translation",
+          "type": "string"
+        },
+        "pronunciation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pronunciation"
+        },
+        "pronunciation_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pronunciation System"
+        }
+      },
+      "required": [
+        "speaker",
+        "text",
+        "translation"
+      ],
+      "title": "Phrase",
+      "type": "object"
+    },
+    "Question": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "choice",
+            "true-false",
+            "select"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "prompt": {
+          "minLength": 1,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "prompt",
+        "options",
+        "explanation"
+      ],
+      "title": "Question",
+      "type": "object"
+    },
+    "Script": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "intro": {
+          "minLength": 1,
+          "title": "Intro",
+          "type": "string"
+        },
+        "language": {
+          "minLength": 2,
+          "title": "Language",
+          "type": "string"
+        },
+        "translation_language": {
+          "minLength": 2,
+          "title": "Translation Language",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "source_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Item Ids",
+          "type": "array"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Segments",
+          "type": "array"
+        },
+        "guid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guid"
+        },
+        "translation_label": {
+          "default": "Translation",
+          "title": "Translation Label",
+          "type": "string"
+        },
+        "answer_label": {
+          "default": "Answer",
+          "title": "Answer Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "intro",
+        "language",
+        "translation_language",
+        "source",
+        "source_item_ids",
+        "segments"
+      ],
+      "title": "Script",
+      "type": "object"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "phrases": {
+          "items": {
+            "$ref": "#/$defs/Phrase"
+          },
+          "minItems": 1,
+          "title": "Phrases",
+          "type": "array"
+        },
+        "question": {
+          "$ref": "#/$defs/Question"
+        }
+      },
+      "required": [
+        "id",
+        "phrases",
+        "question"
+      ],
+      "title": "Segment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "episodes": {
+      "items": {
+        "$ref": "#/$defs/Script"
+      },
+      "title": "Episodes",
+      "type": "array"
+    }
+  },
+  "title": "Scripts",
+  "type": "object"
+}

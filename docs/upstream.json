@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/bes-dev/LingoDeck",
+  "snapshot_date": "2026-11-17",
+  "files": {
+    "skills/lingodeck-dialogues/scripts/dialogue_deck.py": "4e20090b7ba9b56c92f25239a80156185bb3929aff7f4d023bea49dc6d10bfee",
+    "skills/lingodeck-dialogues/references/deck-format.md": "a2e241e1c36dc6c8cc7cdc18751198473220dc4643a898d57c0eec8ebbe5c5b8"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "Note": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "basic",
+            "reversed",
+            "cloze",
+            "reference"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "front": {
+          "minLength": 1,
+          "title": "Front",
+          "type": "string"
+        },
+        "back": {
+          "minLength": 1,
+          "title": "Back",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "hint": {
+          "default": "",
+          "title": "Hint",
+          "type": "string"
+        },
+        "extra": {
+          "default": "",
+          "title": "Extra",
+          "type": "string"
+        },
+        "examples": {
+          "default": "",
+          "title": "Examples",
+          "type": "string"
+        },
+        "provenance": {
+          "default": "",
+          "title": "Provenance",
+          "type": "string"
+        },
+        "guid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Guid"
+        },
+        "source_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Item Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "front",
+        "back",
+        "source_item_ids"
+      ],
+      "title": "Note",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "notes": {
+      "items": {
+        "$ref": "#/$defs/Note"
+      },
+      "title": "Notes",
+      "type": "array"
+    }
+  },
+  "title": "DeckDraft",
+  "type": "object"
+}

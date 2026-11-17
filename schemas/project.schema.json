@@ -1,0 +1,104 @@
+{
+  "$defs": {
+    "AudioConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "model": {
+          "default": "eleven_v3",
+          "title": "Model",
+          "type": "string"
+        },
+        "voices": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Voices",
+          "type": "object"
+        },
+        "max_characters": {
+          "default": 10000,
+          "minimum": 1,
+          "title": "Max Characters",
+          "type": "integer"
+        },
+        "max_request_characters": {
+          "default": 2000,
+          "maximum": 2000,
+          "minimum": 1,
+          "title": "Max Request Characters",
+          "type": "integer"
+        }
+      },
+      "title": "AudioConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1,
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "uid": {
+      "title": "Uid",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "materials": {
+      "title": "Materials",
+      "type": "string"
+    },
+    "source_language": {
+      "minLength": 2,
+      "title": "Source Language",
+      "type": "string"
+    },
+    "translation_language": {
+      "minLength": 2,
+      "title": "Translation Language",
+      "type": "string"
+    },
+    "level": {
+      "default": "unspecified",
+      "title": "Level",
+      "type": "string"
+    },
+    "deck_id": {
+      "exclusiveMaximum": 9007199254740992,
+      "exclusiveMinimum": 0,
+      "title": "Deck Id",
+      "type": "integer"
+    },
+    "model_id": {
+      "exclusiveMaximum": 9007199254740982,
+      "exclusiveMinimum": 0,
+      "title": "Model Id",
+      "type": "integer"
+    },
+    "audio": {
+      "$ref": "#/$defs/AudioConfig"
+    }
+  },
+  "required": [
+    "uid",
+    "name",
+    "materials",
+    "source_language",
+    "translation_language",
+    "deck_id",
+    "model_id"
+  ],
+  "title": "Project",
+  "type": "object"
+}
