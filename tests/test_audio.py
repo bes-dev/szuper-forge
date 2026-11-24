@@ -204,3 +204,18 @@ def test_no_scripts_is_an_explicit_error(demo):
     write(demo / "scripts.json", {"episodes": []})
     with pytest.raises(ForgeError, match="No listening scripts"):
         plan_audio(demo)
+
+
+def test_word_glosses_reuse_exact_synthesis_request(demo):
+    from deck_forge.audio import requests_for
+    from deck_forge.common import project
+    from deck_forge.models import Scripts, WordGloss
+
+    enabled(demo)
+    config = project(demo)
+    scripts = Scripts.model_validate(read(demo / "scripts.json"))
+    before = requests_for(config, scripts)
+    phrase = scripts.episodes[0].segments[0].phrases[0]
+    end = len(phrase.text.split()[0].rstrip(".,!?"))
+    phrase.words = [WordGloss(start=0, end=end, translation="A contextual gloss")]
+    assert requests_for(config, scripts) == before

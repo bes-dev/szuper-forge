@@ -124,3 +124,32 @@ contain synthetic silence solely to test decoding/alignment plumbing; they are
 not examples of spoken lessons and are never released to users. The real endpoint
 is never contacted by the test suite. Real provider synthesis has not been claimed
 unless explicitly run and reviewed for the user’s actual project.
+
+## Verified timestamp-provider limitation
+
+During the 100-episode Hungarian collection audit, returned character/voice-segment
+timestamps were cumulatively early relative to the actual audio. Matching the
+character sequence and finite bounds did not establish synchronization accuracy.
+The final spoken span could be0.56–11.36seconds longer than the metadata, with
+phrase starts corrected by up to13.227seconds after independent word alignment.
+Do not publish raw provider timestamps as acoustically verified. Check the final
+master with independent word/forced alignment and acoustic speech/silence bounds;
+never apply a speculative universal offset or text-length rescaling. Existing
+audio can be reused. Recut derived section clips at measured silent boundaries
+when retiming; updating HTML alone would leave classic Anki segment playback stale.
+A saved exercise checkpoint must hydrate the current imported card and recompute
+its cue from valid audio seconds only when the episode HTML changed, retaining
+answers/help evidence.
+
+
+## Optional offline word translations
+
+`phrases[].words` contains `{start,end,translation,lemma?}` with Python/Unicode
+code-point ranges in the unchanged phrase text. The packager emits direct
+`span[data-gloss]` children. These are word-form meanings in the sentence, not
+queries to a live translation API. Updating glosses preserves request text and
+cached audio; no new synthesis is needed. Keep all audio timestamps and identities.
+See dialogue format §5.3.1; native ranges are derived from HTML, not serialized
+Python indices. Both mobile apps underline clickable words with a dashed line,
+pause for lookup and show a small anchored bubble. Whole-phrase meaning remains
+separate, and word help is included in the lesson assistance state.

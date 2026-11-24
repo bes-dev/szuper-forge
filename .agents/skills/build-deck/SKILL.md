@@ -1,27 +1,14 @@
 ---
 name: build-deck
-description: "Create or update a complete Anki/LingoDeck deck from a folder of teaching materials; orchestrate extraction, grounded authoring, optional listening, validation and packaging."
+description: Create or update an Anki/LingoDeck .apkg from teacher notes, a lesson, or course materials. Use for personal lesson updates and complete ordered courses, including optional listening.
 ---
 
-# Build a deck
+# Build or update a deck
 
-Read [AGENTS.md](../../../AGENTS.md) and [pipeline](../../../docs/pipeline.md).
-Respect the user’s requested language, level, source folder, output location and scope.
+Start from what the learner wants to recall. Use the languages, scope, existing project and output location in the request. Ask only when an unresolved choice would materially change the deck.
 
-1. Find/resume the project. If new, inspect enough source material to infer the
-   brief; ask only unresolved material choices. Initialize with the chosen languages.
-2. Follow [audit-materials](../audit-materials/SKILL.md): extraction, unread pages,
-   source evidence and plan. Save progress in artifacts, not only in conversation.
-3. Read [deck-authoring](../deck-authoring/SKILL.md). Author useful Basic/Reversed/
-   Cloze cards and compact theory chapters. Cover each inventory item or explicitly
-   exclude it with a specific reason. Do not arbitrarily cap the whole corpus at a
-   small demo count when the request asks for complete coverage.
-4. If listening was requested/configured, follow
-   [generate-listening](../generate-listening/SKILL.md). Scripts can reuse the same
-   objectives as cards. Finish actual audio when dependencies and authorization exist.
-5. Follow [verify-deck](../verify-deck/SKILL.md), fix failures and build the package.
-   Report deliverables, scope and limitations. Do not end after scaffolding.
+1. **Select.** For a teacher session, prioritize corrections, phrases the learner tried to say, and the teacher's assignments. For a course or exam, map objectives and prerequisites across the requested material. An explicit request for every vocabulary item overrides selection by usefulness.
+2. **Author.** Resume the existing project. Extract changed inputs and record evidence locally. Use the [editorial guide](../deck-authoring/SKILL.md) for titles, order, card design and incremental edits. Use [source audit](../audit-materials/SKILL.md) for unread pages or coverage problems. The [pipeline](../../../docs/pipeline.md) gives the commands and JSON shapes.
+3. **Deliver.** Build a versioned package using [release verification](../verify-deck/SKILL.md). Give the learner the file, a brief account of additions/changes/omissions and any genuinely unverified results. The preview should make sense to someone who has never seen the inputs.
 
-For incremental updates preserve IDs and existing source/voice decisions. Re-extract
-changed sources, repair only affected content, reuse matching audio cache. Do not
-reseed GUIDs or reset learner memory to make a release look new.
+The user's current agent authors the content. Add [listening](../generate-listening/SKILL.md) when requested, using existing recordings or an explicitly authorized synthesis budget. Ordinary lessons need neither a voice provider nor a separate LLM key.

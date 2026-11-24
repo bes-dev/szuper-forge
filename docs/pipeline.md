@@ -16,8 +16,7 @@ uv run deck-forge status decks/my-course
 Project directory must be outside the input folder. Existing projects are resumed,
 not reinitialized. `project.json` contains persistent uid/deck/model IDs, languages,
 level and audio settings. The source and translation pair above is an example,
-not a default. Root materials path is absolute in local config; release Source
-fields use relative filenames and pages, not the absolute path.
+not a default. Root materials path is absolute in local config; local evidence uses relative filenames and pages.
 
 All machine-readable artifact contracts are in [`../schemas/`](../schemas/).
 Regenerate after changing models:
@@ -121,7 +120,7 @@ Fields: `id`, `kind`, `front`, `back`, `source_item_ids` required. Optional `tag
 | reference | One Basic note with reference/theory tags; Back is HTML chapter |
 
 A note may cover several inventory items, but must remain pedagogically focused.
-The builder generates Source from their evidence and appends optional provenance.
+The builder records evidence and author provenance by GUID in local `reports/provenance.json`. Packaged Source fields are empty; keep any required public credits in a designated credit notice.
 Do not copy Source into Hint. Media references are ordinary Anki sound/HTML
 references; put files in `media/`, with safe flat names. Local CSS imports/fonts
 are collected recursively. Remote files are not fetched. Mobile layouts should

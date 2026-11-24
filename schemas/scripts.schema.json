@@ -67,6 +67,13 @@
           ],
           "default": null,
           "title": "Pronunciation System"
+        },
+        "words": {
+          "items": {
+            "$ref": "#/$defs/WordGloss"
+          },
+          "title": "Words",
+          "type": "array"
         }
       },
       "required": [
@@ -237,6 +244,46 @@
         "question"
       ],
       "title": "Segment",
+      "type": "object"
+    },
+    "WordGloss": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "translation": {
+          "minLength": 1,
+          "title": "Translation",
+          "type": "string"
+        },
+        "lemma": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lemma"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "translation"
+      ],
+      "title": "WordGloss",
       "type": "object"
     }
   },

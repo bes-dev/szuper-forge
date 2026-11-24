@@ -7,7 +7,8 @@ import tempfile
 import zipfile
 import genanki
 
-from .common import check, guid, local_file, read, write
+from .common import check, digest, guid, local_file, read, write
+from .editorial import rank, tag_values
 from .dialogue import load_document
 from .quality import load_artifacts, note_media, run_qa, source_description, expand_media
 
@@ -30,6 +31,26 @@ def preview_media(source):
     )
 
 
+def practice_preview(note):
+    prompt, answer = note.front, note.back
+    if note.kind == "cloze":
+        cloze = re.compile(r"\{\{c([1-9]\d*)::(.+?)(?:::(.*?))?\}\}", re.S)
+        blocks = []
+        for index in dict.fromkeys(match[1] for match in cloze.finditer(prompt)):
+            cue = cloze.sub(lambda m: (m[3] or "…") if m[1] == index else m[2], prompt)
+            filled = cloze.sub(lambda m: m[2], prompt)
+            blocks.append((cue, filled + "<p>" + answer + "</p>"))
+    else:
+        blocks = [(prompt, answer)]
+        if note.kind == "reversed":
+            blocks.append((answer, prompt))
+    hint = f"<p>{note.hint}</p>" if note.hint else ""
+    return "".join(
+        f"<details><summary>{cue}</summary>{hint}<div>{result}</div><p>{note.extra}</p><p>{note.examples}</p></details>"
+        for cue, result in blocks
+    )
+
+
 def build(root, output, check_audio=True):
     root, output = Path(root), Path(output)
     check(not output.exists(), "Output exists; choose a new release filename")
@@ -40,7 +61,7 @@ def build(root, output, check_audio=True):
     forward = {
         "name": "Forward",
         "qfmt": "{{Front}}",
-        "afmt": '{{FrontSide}}<hr id="answer">{{Back}}<p>{{Extra}}</p><p>{{Examples}}</p><details><summary>Source</summary>{{Source}}</details>',
+        "afmt": '{{FrontSide}}<hr id="answer">{{Back}}<p>{{Extra}}</p><p>{{Examples}}</p>',
     }
     models = {}
     for offset, kind in enumerate(("basic", "reversed", "cloze")):
@@ -59,7 +80,7 @@ def build(root, output, check_audio=True):
                 {
                     "name": "Cloze",
                     "qfmt": "{{cloze:Front}}",
-                    "afmt": '{{cloze:Front}}<hr id="answer">{{Back}}<p>{{Extra}}</p><details><summary>Source</summary>{{Source}}</details>',
+                    "afmt": '{{cloze:Front}}<hr id="answer">{{Back}}<p>{{Extra}}</p>',
                 }
             ]
         models[kind] = genanki.Model(
@@ -72,6 +93,13 @@ def build(root, output, check_audio=True):
         )
     deck = genanki.Deck(config.deck_id, config.name)
     media, expected, preview = set(), {}, []
+    evidence, fingerprints, chapters = {}, {}, []
+    previous_path = root / "reports/release.json"
+    previous = None
+    if previous_path.exists():
+        release = read(previous_path)
+        if release.get("project_uid") == config.uid:
+            previous = release.get("note_fingerprints")
     for note in draft.notes:
         tags = set(note.tags)
         if note.kind == "reference":
@@ -82,7 +110,9 @@ def build(root, output, check_audio=True):
         if note.provenance:
             source += "\n" + note.provenance
         identity = guid(config, note)
-        values = [note.front, note.back, note.hint, note.extra, html.escape(source), note.examples]
+        evidence[identity] = source
+        values = [note.front, note.back, note.hint, note.extra, "", note.examples]
+        fingerprints[identity] = digest([note.kind, values, sorted(tags)])
         deck.add_note(
             genanki.Note(
                 model=models["basic" if note.kind == "reference" else note.kind],
@@ -93,9 +123,11 @@ def build(root, output, check_audio=True):
         )
         expected[identity] = values
         media.update(expand_media(root / "media", note_media(note)))
-        preview.append(
-            f"<section><h2>{html.escape(note.id)} · {html.escape(note.kind)}</h2><div>{note.front}</div><details><summary>Answer / theory</summary>{note.back}</details><small>{html.escape(source)}</small></section>"
-        )
+        if note.kind == "reference":
+            section = next(iter(tag_values(tags, "section")), "").replace("_", " ")
+            chapters.append((section, rank(tags, "course-order"), rank(tags, "order"), note))
+        else:
+            preview.append(practice_preview(note))
     ready = root / "dialogues.json"
     if ready.exists():
         _, rows = load_document(ready)
@@ -107,7 +139,7 @@ def build(root, output, check_audio=True):
                 {
                     "name": "Episode",
                     "qfmt": "<h1>{{Front}}</h1>{{Audio}}",
-                    "afmt": '{{FrontSide}}<hr id="answer">{{Back}}<small>{{Source}}</small>',
+                    "afmt": '{{FrontSide}}<hr id="answer">{{Back}}',
                 }
             ],
             css=CSS,
@@ -117,7 +149,9 @@ def build(root, output, check_audio=True):
             source = (
                 source_description(bindings[e["id"]]["source_item_ids"], plan, manifest) + "\n" + e["source"]
             )
-            values = [html.escape(e["title"]), markup, "[sound:" + e["audio"] + "]", html.escape(source)]
+            evidence[identity] = source
+            values = [html.escape(e["title"]), markup, "[sound:" + e["audio"] + "]", ""]
+            fingerprints[identity] = digest(["dialogue", values, sorted(e["tags"])])
             deck.add_note(
                 genanki.Note(
                     model=dialogue_model,
@@ -152,6 +186,16 @@ def build(root, output, check_audio=True):
                 check(values.split("\x1f") == expected[identity], "Packaged field/GUID mismatch")
             card_count = db.execute("SELECT COUNT(*) FROM cards").fetchone()[0]
         staged.replace(output)
+    section_ranks = {}
+    for section, course_rank, _, _ in chapters:
+        section_ranks[section] = min(section_ranks.get(section, float("inf")), course_rank)
+    contents = []
+    for section in sorted(section_ranks, key=section_ranks.get):
+        if section:
+            contents.append(f"<h2>{html.escape(section)}</h2>")
+        for _, _, _, chapter in sorted((c for c in chapters if c[0] == section), key=lambda c: c[2]):
+            contents.append(f"<details><summary>{chapter.front}</summary>{chapter.back}</details>")
+    write(root / "reports/provenance.json", evidence)
     # CSP keeps authored preview content offline even before import into LingoDeck.
     preview_html = (
         "<!doctype html><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; base-uri 'none'\"><title>Deck review</title><style>"
@@ -159,7 +203,7 @@ def build(root, output, check_audio=True):
         + "</style><h1>"
         + html.escape(config.name)
         + "</h1>"
-        + preview_media("".join(preview))
+        + preview_media("".join(contents + preview))
     )
     (root / "reports/preview.html").write_text(preview_html, encoding="utf-8")
     result = {
@@ -168,7 +212,18 @@ def build(root, output, check_audio=True):
         "anki_cards": card_count,
         "media_files": len(media),
         "qa": report,
+        "project_uid": config.uid,
+        "note_fingerprints": fingerprints,
+        "note_changes": None
+        if previous is None
+        else {
+            "added": sorted(fingerprints.keys() - previous.keys()),
+            "updated": sorted(
+                k for k in fingerprints.keys() & previous.keys() if fingerprints[k] != previous[k]
+            ),
+            "removed": sorted(previous.keys() - fingerprints.keys()),
+        },
         "manual_review": "Not automatically asserted: open preview, listen, check Anki/LingoDeck",
     }
     write(root / "reports/release.json", result)
-    return result
+    return {key: value for key, value in result.items() if key != "note_fingerprints"}

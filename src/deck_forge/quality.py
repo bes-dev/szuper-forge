@@ -6,6 +6,8 @@ import subprocess
 from .common import check, digest, guid, local_file, normalized, project, read, write, safe_error
 from .dialogue import load_document, verify_media
 from .materials import html_text
+from .editorial import review_notes, review_text, review_title, source_cues
+from xml.etree import ElementTree
 from .models import DeckDraft, Plan, Scripts
 
 
@@ -102,6 +104,26 @@ def run_qa(root, check_audio=False, preparing_audio=False):
     try:
         config, manifest, plan, draft, scripts = load_artifacts(root)
         validate_scripts(config, scripts)
+        cues = source_cues(manifest)
+        review_notes(draft.notes, cues, warnings)
+        review_text("deck.name", config.name, cues, warnings)
+        for episode in scripts.episodes:
+            review_title(episode.id, episode.title, episode.tags, warnings)
+            fields = [episode.title, episode.intro, *[t.replace("_", " ") for t in episode.tags]]
+            for segment in episode.segments:
+                q = segment.question
+                fields.extend([q.prompt, q.explanation, *(option.text for option in q.options)])
+                for phrase in segment.phrases:
+                    fields.extend(
+                        [
+                            phrase.text,
+                            phrase.translation,
+                            phrase.speaker,
+                            *(w.translation for w in phrase.words),
+                        ]
+                    )
+            for field in fields:
+                review_text(episode.id, field, cues, warnings)
         sources = {s["id"]: s for s in manifest["sources"]}
         check(len(sources) == len(manifest["sources"]), "Duplicate source IDs")
         excluded_sources = {e.id: e.reason for e in plan.excluded_sources}
@@ -209,7 +231,15 @@ def run_qa(root, check_audio=False, preparing_audio=False):
                     binding_doc.get("scripts_sha256") == digest(scripts.model_dump(mode="json")),
                     "Listening scripts changed; regenerate audio or provide updated authored alignment",
                 )
-            for e, identity, _, files in rows:
+            for e, identity, markup, files in rows:
+                review_title(e["id"], e["title"], e["tags"], warnings)
+                review_text(e["id"], markup, cues, warnings)
+                for element in ElementTree.fromstring(markup).iter():
+                    for name in ("data-translation", "data-gloss", "data-speaker", "data-lemma"):
+                        if name in element.attrib:
+                            review_text(e["id"], element.attrib[name], cues, warnings)
+                for tag in e["tags"]:
+                    review_text(e["id"], tag.replace("_", " "), cues, warnings)
                 check(identity not in identities, "Duplicate GUID between normal notes and episodes")
                 identities.add(identity)
                 check(e["id"] not in note_ids, "Note/episode IDs must be globally unique")
@@ -261,6 +291,7 @@ def run_qa(root, check_audio=False, preparing_audio=False):
         )
     except (ValueError, OSError, KeyError, TypeError, subprocess.SubprocessError) as exc:
         errors.append(safe_error(exc))
+    report["warnings"] = list(dict.fromkeys(warnings))
     report["passed"] = not errors
     write(root / ("reports/preaudio-qa.json" if preparing_audio else "reports/qa.json"), report)
     return report

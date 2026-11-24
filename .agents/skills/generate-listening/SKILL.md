@@ -14,6 +14,13 @@ IDs explicit. Give each short semantic phrase its own context-faithful translati
 Optional pronunciation is authored IPA/reading aid, not hardcoded transliteration.
 State its generation/review provenance. Do not infer phonetic accuracy from spelling.
 
+When word lookup is requested, add contextual `words` entries to every phrase:
+Unicode-code-point `start/end`, translation, optional lemma. The runtime receives
+inline HTML `span[data-gloss]`, not the JSON offsets. Preserve exact source text,
+spacing, timings and audio when adding glosses; repeated words may need different
+meanings. Do not treat grammar-question prompts as dictionary definitions.
+These additions reuse the same cached synthesis request and need no live TTS.
+
 Use several meaningful segments for a long dialogue; each has one objective
 choice/true-false/select question, plausible distractors and an explanation.
 Keep each provider request within 2,000 characters; split on meaningful boundaries,

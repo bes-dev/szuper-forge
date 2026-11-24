@@ -150,6 +150,12 @@ def validate_html(source):
                 f"{sid}: ambiguous overlap/order; fix actual alignment",
             )
             previous_start, previous_end = start, end
+            for word in phrase:
+                if word.tag == "span" and "data-gloss" in word.attrib:
+                    require(bool(value(word)), "Empty glossed word")
+                    text(word.get("data-gloss"), "word translation")
+                    if "data-lemma" in word.attrib:
+                        text(word.get("data-lemma"), "word lemma")
             if phrase.get("data-audio") is not None:
                 files.add(media_name(phrase.get("data-audio")))
         q = child(section, "fieldset", "question")
@@ -179,6 +185,41 @@ def validate_html(source):
     return files
 
 
+def word_glosses(phrase):
+    """Authoring offsets are Unicode code points, converted to spans for native parsers."""
+    items = phrase.get("words", [])
+    require(isinstance(items, list), "phrase.words must be an array")
+    previous = 0
+    for word in items:
+        keys(word, ("start", "end", "translation"), ("lemma",), "word")
+        start, end = word["start"], word["end"]
+        require(type(start) is int and type(end) is int, "word offsets must be integers")
+        require(previous <= start < end <= len(phrase["text"]), "word ranges overlap or are outside phrase")
+        require(phrase["text"][start:end].strip() == phrase["text"][start:end] and bool(phrase["text"][start:end].strip()), "word must not include boundary whitespace")
+        text(word["translation"], "word.translation")
+        if "lemma" in word:
+            text(word["lemma"], "word.lemma")
+        previous = end
+    return items
+
+
+def phrase_markup(transcript, attrs, phrase):
+    paragraph = ET.SubElement(transcript, "p", attrs)
+    words = word_glosses(phrase)
+    if not words:
+        paragraph.text = phrase["text"]
+        return
+    paragraph.text = phrase["text"][:words[0]["start"]]
+    for index, word in enumerate(words):
+        attributes = {"data-gloss": word["translation"]}
+        if "lemma" in word:
+            attributes["data-lemma"] = word["lemma"]
+        span = ET.SubElement(paragraph, "span", attributes)
+        span.text = phrase["text"][word["start"]:word["end"]]
+        following = words[index + 1]["start"] if index + 1 < len(words) else len(phrase["text"])
+        span.tail = phrase["text"][word["end"]:following]
+
+
 def markup(episode):
     # Attribute/text escaping is delegated to the XML serializer.
     attrs = {
@@ -206,7 +247,7 @@ def markup(episode):
             for key in ("audio", "pronunciation", "pronunciation_system"):
                 if key in phrase:
                     attrs["data-" + key.replace("_", "-")] = phrase[key]
-            ET.SubElement(transcript, "p", attrs).text = phrase["text"]
+            phrase_markup(transcript, attrs, phrase)
             details = ET.SubElement(transcript, "details")
             ET.SubElement(details, "summary").text = episode.get("translation_label", "Translation")
             ET.SubElement(details, "p").text = phrase["translation"]
@@ -305,10 +346,10 @@ def load_document(path):
                 keys(
                     phrase,
                     ("speaker", "text", "translation", "start", "end"),
-                    ("audio", "pronunciation", "pronunciation_system"),
+                    ("audio", "pronunciation", "pronunciation_system", "words"),
                     "phrase",
                 )
-                for key in set(phrase) - {"start", "end"}:
+                for key in set(phrase) - {"start", "end", "words"}:
                     text(phrase[key], f"phrase.{key}")
                 number(phrase["start"], "phrase.start")
                 number(phrase["end"], "phrase.end")
@@ -386,7 +427,7 @@ def package(deck, rows, base, destination):
             {
                 "name": "Episode",
                 "qfmt": "<h1>{{Front}}</h1>{{Audio}}",
-                "afmt": '{{FrontSide}}<hr id="answer">{{Back}}<hr><small>{{Source}}</small>',
+                "afmt": '{{FrontSide}}<hr id="answer">{{Back}}',
             }
         ],
         css='body{font:20px/1.6 -apple-system,sans-serif;text-align:left;padding:16px}audio{width:100%}section{margin:24px 0}label{display:block;padding:8px}fieldset{border:1px solid #aaa}details{margin:8px 0}[data-kind="explanation"]{font-size:.9em}',

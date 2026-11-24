@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Literal
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, model_serializer
 
 
 class Model(BaseModel):
@@ -91,12 +91,39 @@ class Question(Model):
     explanation: str = Field(min_length=1)
 
 
+class WordGloss(Model):
+    start: int = Field(ge=0, strict=True)
+    end: int = Field(gt=0, strict=True)
+    translation: str = Field(min_length=1)
+    lemma: str | None = Field(default=None, min_length=1)
+
+
 class Phrase(Model):
     speaker: str = Field(min_length=1)
     text: str = Field(min_length=1)
     translation: str = Field(min_length=1)
     pronunciation: str | None = None
     pronunciation_system: str | None = None
+    words: list[WordGloss] = Field(default_factory=list)
+
+    @model_serializer(mode="wrap")
+    def serialize_words(self, handler):
+        result = handler(self)
+        if not self.words:
+            result.pop("words", None)
+        return result
+
+    @model_validator(mode="after")
+    def validate_words(self):
+        previous = 0
+        for word in self.words:
+            if not previous <= word.start < word.end <= len(self.text):
+                raise ValueError("word ranges overlap or are outside phrase")
+            value = self.text[word.start:word.end]
+            if not value.strip() or value != value.strip():
+                raise ValueError("word must not include boundary whitespace")
+            previous = word.end
+        return self
 
 
 class Segment(Model):

@@ -28,7 +28,7 @@ def create(root):
             "items": [
                 {
                     "id": i,
-                    "topic": "Everyday::Cafe",
+                    "topic": "lingodeck::topic::A1_·_Заказать_напиток",
                     "objective": objective,
                     "refs": [{"source_id": sid, "page": 1, "quote": quote}],
                 }
@@ -42,7 +42,7 @@ def create(root):
             "kind": "reversed",
             "front": word,
             "back": meaning,
-            "tags": ["Everyday::Cafe"],
+            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
             "source_item_ids": [word],
         }
         for word, meaning in [("tea", "чай"), ("coffee", "кофе"), ("milk", "молоко")]
@@ -53,23 +53,30 @@ def create(root):
             "kind": "cloze",
             "front": "Tea, {{c1::please}}.",
             "back": "Чай, пожалуйста.",
-            "tags": ["Everyday::Cafe"],
+            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
             "source_item_ids": ["politeness"],
         },
         {
             "id": "polite-request-reference",
             "kind": "reference",
-            "front": "Polite requests",
-            "back": "<h1>Polite requests</h1><p>Use <strong>please</strong> to make a request polite.</p><blockquote>Tea, please.<br />Чай, пожалуйста.</blockquote>",
-            "tags": ["Everyday::Cafe", "lingodeck::section::usage", "lingodeck::order::10"],
+            "front": "A1 · Заказать напиток",
+            "back": "<h1>A1 · Заказать напиток</h1><p>Добавьте <strong>please</strong>, когда вежливо просите напиток.</p><blockquote>Tea, please.<br />Чай, пожалуйста.</blockquote>",
+            "tags": [
+                "lingodeck::topic::A1_·_Заказать_напиток",
+                "lingodeck::section::В_кафе",
+                "lingodeck::practice::cafe-order",
+                "lingodeck::course-order::10",
+                "lingodeck::order::10",
+                "lingodeck::level::A1",
+            ],
             "source_item_ids": ["politeness"],
         },
         {
             "id": "cafe-fact",
             "kind": "basic",
-            "front": "What does the customer want?",
-            "back": "Tea",
-            "tags": ["Everyday::Cafe"],
+            "front": "Посетитель говорит «Tea, please». Какой напиток он просит?",
+            "back": "Чай",
+            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
             "source_item_ids": ["dialogue"],
         },
     ]
@@ -80,11 +87,16 @@ def create(root):
             "episodes": [
                 {
                     "id": "cafe-listening",
-                    "title": "At the café",
+                    "title": "A1 · Заказ в кафе",
                     "intro": "Послушайте заказ посетителя.",
                     "language": "en",
                     "translation_language": "ru",
-                    "tags": ["Everyday::Cafe"],
+                    "tags": [
+                        "lingodeck::topic::A1_·_Заказать_напиток",
+                        "lingodeck::format::dialogue",
+                        "lingodeck::level::A1",
+                        "lingodeck::order::10",
+                    ],
                     "source": "Authored practice scene based on the supplied café lesson.",
                     "source_item_ids": ["tea", "milk", "politeness", "dialogue"],
                     "translation_label": "Перевод",

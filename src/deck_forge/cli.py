@@ -36,7 +36,7 @@ def initialize(root, materials, name, source_language, translation_language, lev
     write(root / "plan.json", {"items": [], "excluded_items": [], "excluded_sources": []})
     write(root / "deck.json", {"notes": []})
     write(root / "scripts.json", {"episodes": []})
-    (root / ".gitignore").write_text(".cache/\nmedia/\ndist/\n.env*\naudio-ledger.json\nsources/\n")
+    (root / ".gitignore").write_text(".cache/\nmedia/\ndist/\n.env*\naudio-ledger.json\nsources/\nreports/provenance.json\n")
     return {
         "project": str(root),
         "next": "extract, then have your agent author plan.json, deck.json and optional scripts.json",

@@ -14,9 +14,7 @@ missing media and invalid timing. Do not weaken the gate, drop an entire topic o
 invent an exclusion to hide an authoring error. If the source is actually missing
 or undecidable, document that limitation and ask only when a user decision is needed.
 
-Inspect the authored content against sources: exact senses, contextual translations,
-quiz correctness, natural scenes and mobile-readable theory. Local gates do not
-prove those properties automatically. Revisit affected material after corrections.
+Read the contents in order: titles alone should show what comes next. Inspect chapter and topic links, level labels, and the first, middle and final lessons. Review each flagged source-dependent phrase in context. Try prompts without the original material; check both directions, plausible typed variants, and an actual mistake. Resolve ambiguous prompts and unintended answer leaks. Check the complete learner-facing wording in both languages, including hints, examples and audio quiz feedback. For a small teacher lesson review every card. For a large course also sample each exercise type and review all changed or flagged patterns. State the extent of manual inspection.
 
 Run `deck-forge build PROJECT --output PROJECT/dist/RELEASE.apkg`. It reruns QA,
 builds mixed note models and checks actual ZIP/SQLite/media. Review the generated

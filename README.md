@@ -41,6 +41,12 @@ materials → extract/OCR → grounded plan → cards + theory + listening scrip
           → optional ElevenLabs audio/timestamps → QA → preview + .apkg + report
 ```
 
+For a lesson with a teacher, a sufficient brief is:
+
+> Добавь сегодняшний конспект в мою колоду. В приоритете мои ошибки и фразы, которые я хотел сказать. Объедини повторы, сохрани историю и покажи изменения. Озвучка не нужна.
+
+For a full course, specify the intended outcome and whether coverage must be exhaustive. The same workflow produces a sequenced contents list, self-contained chapters and linked practice. You can review the result offline in `reports/preview.html`. Original evidence stays in the authoring project (`reports/provenance.json`).
+
 ## What it supports
 
 - PDF text extraction page by page; scanned PDF and image OCR with optional

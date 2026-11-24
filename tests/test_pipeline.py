@@ -37,7 +37,9 @@ def test_materials_to_real_mixed_anki_package_without_keys(demo, monkeypatch):
     assert any("lingodeck::reference" in row[2] for row in notes)
     assert any("{{c1::please}}" in row[1] for row in notes)
     fields = next(f.split("\x1f") for _, f, _ in notes if f.startswith("tea\x1f"))
-    assert fields[2] == "" and "lesson.md" in fields[4] and "tea — чай" in fields[4]
+    assert fields[2] == fields[4] == ""
+    evidence = read(demo / "reports/provenance.json")
+    assert any("lesson.md" in entry and "tea — чай" in entry for entry in evidence.values())
     assert (demo / "reports/preview.html").exists()
     assert read(demo / "reports/release.json")["qa"]["passed"]
 
@@ -51,7 +53,9 @@ def test_guid_stability_when_content_and_topics_change(demo):
     draft["notes"][0]["tags"].append("Teacher::Lesson_2")
     write(demo / "deck.json", draft)
     second = demo / "dist/v2.apkg"
-    build(demo, second)
+    changes = build(demo, second)["note_changes"]
+    assert changes["added"] == changes["removed"] == []
+    assert len(changes["updated"]) == 1
     updated, _ = notes_in_package(second)
     assert [n[0] for n in original] == [n[0] for n in updated]
     assert [n[1] for n in original] != [n[1] for n in updated]
@@ -231,3 +235,50 @@ def test_invalid_config_never_echoes_accidentally_embedded_secret(demo):
     report = run_qa(demo)
     assert not report["passed"]
     assert "accidentally-entered-secret" not in json.dumps(report)
+
+
+def test_learner_templates_never_render_source_metadata(demo):
+    output = demo / "dist/no-provenance-ui.apkg"
+    build(demo, output)
+    with zipfile.ZipFile(output) as archive:
+        database = demo / "source-policy.sqlite"
+        database.write_bytes(archive.read("collection.anki2"))
+    with sqlite3.connect(database) as db:
+        models = json.loads(db.execute("SELECT models FROM col").fetchone()[0])
+        for model in models.values():
+            for template in model["tmpls"]:
+                assert "{{Source}}" not in template["qfmt"]
+                assert "{{Source}}" not in template["afmt"]
+        assert all("lesson.md" not in fields for (fields,) in db.execute("SELECT flds FROM notes"))
+
+
+def test_editorial_review_and_chapter_sequence(demo):
+    draft = read(demo / "deck.json")
+    chapter = draft["notes"][4]
+    earlier = dict(
+        chapter,
+        id="earlier",
+        front="A1 · Поздороваться",
+        back="<h1>A1 · Поздороваться</h1><p>Доброе утро!</p>",
+        tags=[tag.replace("::10", "::5") for tag in chapter["tags"]],
+    )
+    draft["notes"].append(earlier)
+    draft["notes"][0]["hint"] = "Как указано на слайде 4"
+    chapter["tags"].remove("lingodeck::practice::cafe-order")
+    chapter["tags"].append("lingodeck::practice::missing")
+    draft["notes"][1]["examples"] = "I give a presentation on Fridays."
+    write(demo / "deck.json", draft)
+    qa = run_qa(demo)
+    assert qa["passed"]
+    assert any("tea.hint" in w for w in qa["warnings"])
+    assert any("practice link" in w for w in qa["warnings"])
+    assert not any("coffee.examples" in w for w in qa["warnings"])
+    draft["notes"][0]["hint"] = ""
+    chapter["tags"][-1] = "lingodeck::practice::cafe-order"
+    write(demo / "deck.json", draft)
+    build(demo, demo / "dist/ordered.apkg")
+    preview = (demo / "reports/preview.html").read_text()
+    assert preview.index("A1 · Поздороваться") < preview.index("A1 · Заказать напиток")
+    assert "lesson.md" not in preview
+    assert "{{c1::" not in preview
+    assert "<summary>чай</summary>" in preview
