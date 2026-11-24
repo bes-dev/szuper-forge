@@ -38,7 +38,7 @@ def validate_scripts(config, scripts):
             )
         check(not any(not t or any(c.isspace() for c in t) for t in e.tags), f"{e.id}: invalid tags")
         check(
-            not any(t.lower() == "lingodeck::reference" for t in e.tags), "Dialogue cannot also be reference"
+            not any(t.lower() == "szuper::reference" for t in e.tags), "Dialogue cannot also be reference"
         )
         segment_ids = set()
         for s in e.segments:
@@ -175,11 +175,11 @@ def run_qa(root, check_audio=False, preparing_audio=False):
             check(set(note.source_item_ids) <= items.keys(), f"{note.id}: unknown source_item_ids")
             covered.update(note.source_item_ids)
             check(
-                not any(t.lower() == "lingodeck::dialogue" for t in note.tags),
+                not any(t.lower() == "szuper::dialogue" for t in note.tags),
                 "Use scripts.json/dialogues.json for dialogue notes",
             )
             check(
-                note.kind == "reference" or not any(t.lower() == "lingodeck::reference" for t in note.tags),
+                note.kind == "reference" or not any(t.lower() == "szuper::reference" for t in note.tags),
                 "reference tag requires reference kind",
             )
             check(

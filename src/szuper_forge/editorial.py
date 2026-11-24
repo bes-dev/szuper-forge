@@ -17,7 +17,7 @@ NUMBERED = re.compile(r"^(?:(?:lesson|chapter|урок|глава)\s+\d+\b|\d+[.
 
 
 def tag_values(tags, name):
-    prefix = "lingodeck::" + name + "::"
+    prefix = "szuper::" + name + "::"
     return [tag[len(prefix) :] for tag in tags if tag.lower().startswith(prefix)]
 
 
@@ -73,7 +73,7 @@ def review_notes(notes, cues, warnings):
         for topic in (
             tag_values(n.tags, "topic")
             + tag_values(n.tags, "section")
-            + [t for t in n.tags if not t.lower().startswith("lingodeck::")]
+            + [t for t in n.tags if not t.lower().startswith("szuper::")]
         ):
             review_text(f"{n.id}.topic", topic.replace("_", " "), cues, warnings)
         if n.kind in {"basic", "reversed"}:

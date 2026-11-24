@@ -1,11 +1,11 @@
-# LingoDeck Forge
+# Szuper Forge
 
 A local agent harness that turns a folder of teaching materials into a grounded,
-reviewable **Anki `.apkg`**, including LingoDeck theory pages and optional
+reviewable **Anki `.apkg`**, including Szuper theory pages and optional
 synchronized dialogue listening lessons.
 
 Give your coding agent the materials folder and the desired languages/level.
-The agent reads the sources and authors the content. Deck Forge handles extraction,
+The agent reads the sources and authors the content. Szuper Forge handles extraction,
 source references, coverage checks, stable identities, audio and packaging.
 **No separate LLM API key is required**: use the agent you already run.
 
@@ -13,24 +13,24 @@ Inspired by [etnamute](https://github.com/bes-dev/etnamute): short commands, sha
 pipeline instructions, durable artifacts, explicit QA before delivery. This is an
 independent implementation for learning materials, not an app builder.
 
-[Project and support](https://bes-dev.com/lingodeck/) · [Deck creation guide](https://bes-dev.com/lingodeck/guide/) · [Privacy](https://bes-dev.com/lingodeck/privacy/) · [Terms](https://bes-dev.com/lingodeck/terms/)
+[Project and support](https://bes-dev.com/szuper/) · [Deck creation guide](https://bes-dev.com/szuper/guide/) · [Privacy](https://bes-dev.com/szuper/privacy/) · [Terms](https://bes-dev.com/szuper/terms/)
 
 ## Start
 
 Python 3.11+ and [uv](https://docs.astral.sh/uv/) or pip:
 
 ```sh
-git clone https://github.com/bes-dev/deck-forge.git
-cd deck-forge
+git clone https://github.com/bes-dev/szuper-forge.git
+cd szuper-forge
 ./setup.sh
-# or: uv sync --frozen && uv run --frozen lingodeck-forge doctor
+# or: uv sync --frozen && uv run --frozen szuper-forge doctor
 ```
 
 Or `python3 -m venv .venv && .venv/bin/pip install -e .`.
 
 The source checkout includes the agent skills and worked example. A wheel installs the CLI for scripted use.
 
-Both `lingodeck-forge` and the original `deck-forge` command run the same CLI. Keep using the existing project folder when updating a deck.
+Keep using the existing project folder when updating a deck.
 
 Open this repository with Codex, Claude Code, or another file/terminal-capable
 agent, and ask:
@@ -81,15 +81,15 @@ not that a model has proved it understood every concept in the materials.
 ## Try without any API keys
 
 ```sh
-uv run python examples/create_demo.py /tmp/deck-forge-demo
-uv run deck-forge qa /tmp/deck-forge-demo
-uv run deck-forge build /tmp/deck-forge-demo --output /tmp/deck-forge-demo/dist/demo.apkg
+uv run python examples/create_demo.py /tmp/szuper-forge-demo
+uv run szuper-forge qa /tmp/szuper-forge-demo
+uv run szuper-forge build /tmp/szuper-forge-demo --output /tmp/szuper-forge-demo/dist/demo.apkg
 ```
 
 The demo includes three reversible vocabulary notes, one Cloze, one theory page,
 one factual Basic note and an optional listening script. Audio is disabled by
 default; the report explicitly says it was omitted. No placeholder recordings
-are shipped. Open `reports/preview.html`, then import `.apkg` into Anki/LingoDeck.
+are shipped. Open `reports/preview.html`, then import `.apkg` into Anki/Szuper.
 
 ## Optional listening with ElevenLabs
 
@@ -105,10 +105,10 @@ account. No voices or language pairs are hardcoded. For the demo, speaker names
 are `Customer` and `Server`; choose their actual voice IDs in the config.
 
 ```sh
-uv run deck-forge audio /tmp/deck-forge-demo           # offline plan, no paid requests
-uv run deck-forge audio /tmp/deck-forge-demo --execute # generate within configured ceiling
-uv run deck-forge qa /tmp/deck-forge-demo --check-audio
-uv run deck-forge build /tmp/deck-forge-demo --output /tmp/deck-forge-demo/dist/with-listening.apkg
+uv run szuper-forge audio /tmp/szuper-forge-demo           # offline plan, no paid requests
+uv run szuper-forge audio /tmp/szuper-forge-demo --execute # generate within configured ceiling
+uv run szuper-forge qa /tmp/szuper-forge-demo --check-audio
+uv run szuper-forge build /tmp/szuper-forge-demo --output /tmp/szuper-forge-demo/dist/with-listening.apkg
 ```
 
 The integration uses ElevenLabs’ documented
@@ -164,12 +164,12 @@ or upload the source folder to GitHub.
 
 - [Agent operating instructions](AGENTS.md)
 - [Pipeline and input schemas](docs/pipeline.md)
-- [Full implemented LingoDeck deck specification](docs/deck-format.md)
+- [Full implemented Szuper deck specification](docs/deck-format.md)
 - [Audio, caching and recovery](docs/audio.md)
 - [Validation and limitations](docs/validation.md)
 - [Example project generator](examples/create_demo.py)
 
-The specification and dialogue parser/packager were seeded from the LingoDeck
+The specification and dialogue parser/packager were seeded from the Szuper
 format; [upstream hashes](docs/upstream.json) record the snapshot. No runtime
 checkout of the mobile app is needed. Format updates should be synchronized with
 both mobile parsers before changing the version contract.

@@ -5,8 +5,8 @@ description: "Inspect and extract teaching materials, resolve OCR/transcription 
 
 # Audit materials
 
-Use `deck-forge extract PROJECT`. Inspect `sources/manifest.json`, including unread
-pages and errors, then read content via `deck-forge source PROJECT SOURCE_ID --page N
+Use `szuper-forge extract PROJECT`. Inspect `sources/manifest.json`, including unread
+pages and errors, then read content via `szuper-forge source PROJECT SOURCE_ID --page N
 --offset N`. See [pipeline](../../../docs/pipeline.md) for commands and JSON schemas.
 
 Do a breadth-first inventory of all files/pages before polishing one chapter.

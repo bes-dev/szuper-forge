@@ -8,10 +8,10 @@ if [[ ! -e .claude/skills && ! -L .claude/skills ]]; then
 fi
 if command -v uv >/dev/null 2>&1; then
   uv sync --frozen
-  uv run --frozen lingodeck-forge doctor
+  uv run --frozen szuper-forge doctor
 else
   python3 -m venv .venv
   .venv/bin/python -m pip install -e .
-  .venv/bin/deck-forge doctor
+  .venv/bin/szuper-forge doctor
 fi
 printf '\nReady. Open this repository with your agent and ask it to read AGENTS.md and build a deck from your material folder.\n'

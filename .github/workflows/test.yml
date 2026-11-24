@@ -34,7 +34,7 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/forge-venv/bin/python" "$RUNNER_TEMP"/forge-dist/*.whl
           cd "$RUNNER_TEMP"
           forge_bin="$RUNNER_TEMP/forge-venv/bin"
-          "$forge_bin/lingodeck-forge" --version
-          "$forge_bin/deck-forge" doctor
+          "$forge_bin/szuper-forge" --version
+          "$forge_bin/szuper-forge" doctor
           "$forge_bin/python" "$GITHUB_WORKSPACE/examples/create_demo.py" lesson
-          "$forge_bin/lingodeck-forge" build lesson --output lesson/dist/check.apkg
+          "$forge_bin/szuper-forge" build lesson --output lesson/dist/check.apkg

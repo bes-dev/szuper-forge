@@ -4,9 +4,9 @@
 import json
 from pathlib import Path
 import sys
-from deck_forge.cli import initialize
-from deck_forge.common import read, write
-from deck_forge.materials import extract
+from szuper_forge.cli import initialize
+from szuper_forge.common import read, write
+from szuper_forge.materials import extract
 
 
 def create(root):
@@ -28,7 +28,7 @@ def create(root):
             "items": [
                 {
                     "id": i,
-                    "topic": "lingodeck::topic::A1_·_Заказать_напиток",
+                    "topic": "szuper::topic::A1_·_Заказать_напиток",
                     "objective": objective,
                     "refs": [{"source_id": sid, "page": 1, "quote": quote}],
                 }
@@ -42,7 +42,7 @@ def create(root):
             "kind": "reversed",
             "front": word,
             "back": meaning,
-            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
+            "tags": ["szuper::topic::A1_·_Заказать_напиток", "szuper::practice::cafe-order"],
             "source_item_ids": [word],
         }
         for word, meaning in [("tea", "чай"), ("coffee", "кофе"), ("milk", "молоко")]
@@ -53,7 +53,7 @@ def create(root):
             "kind": "cloze",
             "front": "Tea, {{c1::please}}.",
             "back": "Чай, пожалуйста.",
-            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
+            "tags": ["szuper::topic::A1_·_Заказать_напиток", "szuper::practice::cafe-order"],
             "source_item_ids": ["politeness"],
         },
         {
@@ -62,12 +62,12 @@ def create(root):
             "front": "A1 · Заказать напиток",
             "back": "<h1>A1 · Заказать напиток</h1><p>Добавьте <strong>please</strong>, когда вежливо просите напиток.</p><blockquote>Tea, please.<br />Чай, пожалуйста.</blockquote>",
             "tags": [
-                "lingodeck::topic::A1_·_Заказать_напиток",
-                "lingodeck::section::В_кафе",
-                "lingodeck::practice::cafe-order",
-                "lingodeck::course-order::10",
-                "lingodeck::order::10",
-                "lingodeck::level::A1",
+                "szuper::topic::A1_·_Заказать_напиток",
+                "szuper::section::В_кафе",
+                "szuper::practice::cafe-order",
+                "szuper::course-order::10",
+                "szuper::order::10",
+                "szuper::level::A1",
             ],
             "source_item_ids": ["politeness"],
         },
@@ -76,7 +76,7 @@ def create(root):
             "kind": "basic",
             "front": "Посетитель говорит «Tea, please». Какой напиток он просит?",
             "back": "Чай",
-            "tags": ["lingodeck::topic::A1_·_Заказать_напиток", "lingodeck::practice::cafe-order"],
+            "tags": ["szuper::topic::A1_·_Заказать_напиток", "szuper::practice::cafe-order"],
             "source_item_ids": ["dialogue"],
         },
     ]
@@ -92,10 +92,10 @@ def create(root):
                     "language": "en",
                     "translation_language": "ru",
                     "tags": [
-                        "lingodeck::topic::A1_·_Заказать_напиток",
-                        "lingodeck::format::dialogue",
-                        "lingodeck::level::A1",
-                        "lingodeck::order::10",
+                        "szuper::topic::A1_·_Заказать_напиток",
+                        "szuper::format::dialogue",
+                        "szuper::level::A1",
+                        "szuper::order::10",
                     ],
                     "source": "Authored practice scene based on the supplied café lesson.",
                     "source_item_ids": ["tea", "milk", "politeness", "dialogue"],

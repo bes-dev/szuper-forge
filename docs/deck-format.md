@@ -1,8 +1,8 @@
-# LingoDeck Deck Format
+# Szuper Deck Format
 
-Снимок контракта upstream LingoDeck; пути к мобильному коду относятся к
-репозиторию [bes-dev/LingoDeck](https://github.com/bes-dev/LingoDeck), а не к harness.
-Здесь используются `deck-forge` и модуль `src/deck_forge/dialogue.py`.
+Снимок контракта upstream Szuper; пути к мобильному коду относятся к
+репозиторию [bes-dev/Szuper](https://github.com/bes-dev/Szuper), а не к harness.
+Здесь используются `szuper-forge` и модуль `src/szuper_forge/dialogue.py`.
 
 Спецификация реализованного формата, редакция 1.0 от 2026-11-17.
 Диалоговое расширение имеет независимую версию `data-version="1"`.
@@ -23,14 +23,14 @@
 
 ## 1. Область действия
 
-LingoDeck использует обычный контейнер Anki `.apkg`. Отдельного расширения файла,
-обязательного LingoDeck-манифеста и обязательной модели заметок нет.
+Szuper использует обычный контейнер Anki `.apkg`. Отдельного расширения файла,
+обязательного Szuper-манифеста и обязательной модели заметок нет.
 
 | Уровень | Содержимое | Назначение |
 |---|---|---|
 | Обычная Anki-колода | Basic, Reversed, Cloze, медиа, теги | Автоматически строящиеся упражнения и классический режим |
-| Справочная заметка | Basic + `lingodeck::reference` + HTML | Теория, не участвующая в повторениях |
-| Диалог v1 | Forward Basic + `lingodeck::dialogue` + структурированный Back | Единый плеер, синхронные реплики и авторский квиз |
+| Справочная заметка | Basic + `szuper::reference` + HTML | Теория, не участвующая в повторениях |
+| Диалог v1 | Forward Basic + `szuper::dialogue` + структурированный Back | Единый плеер, синхронные реплики и авторский квиз |
 
 **Требование парсера** описывает, что принимает текущая реализация.
 **Профиль новых эпизодов** — более строгие правила авторинга, обеспечивающие
@@ -122,23 +122,23 @@ Cloze записывается канонически: `{{c1::answer}}` или `
 | Тег | Значение |
 |---|---|
 | `Grammar::Questions` | Обычная тема «Grammar › Questions» |
-| `lingodeck::topic::<name>` | Старый явный канал темы; новые колоды могут использовать обычные теги |
-| `lingodeck::reference` | HTML-справка, исключённая из упражнений/очереди/освоения |
-| `lingodeck::dialogue` | Полный авторский эпизод аудирования v1 |
-| `lingodeck::material::theory` | Назначение reference: правило/объяснение |
-| `lingodeck::material::lexicon` | Словарные справочные данные, без отдельного раздела интерфейса |
-| `lingodeck::material::lesson` | Оригинал/допматериал урока |
-| `lingodeck::material::guide` | Инструкция или сведения о колоде |
-| `lingodeck::section::<key>` | Группа правил справочника |
-| `lingodeck::order::<integer>` | Порядок главы внутри справочника |
-| `lingodeck::type::vocab\|cloze\|fact\|term\|rule` | Необязательный тип знания; значение — один из перечисленных вариантов |
-| `lingodeck::confuse::<group>` | Узкая группа путаемых ответов для дистракторов |
-| `lingodeck::listening` | Старый формат выделенного аудирования |
-| `lingodeck::audio-language::<BCP-47>` | Объявленный язык аудио; при наличии имеет приоритет в ListeningMaterial |
-| `lingodeck::listening-target::<value>` | Старое текстовое уточнение цели аудирования |
+| `szuper::topic::<name>` | Старый явный канал темы; новые колоды могут использовать обычные теги |
+| `szuper::reference` | HTML-справка, исключённая из упражнений/очереди/освоения |
+| `szuper::dialogue` | Полный авторский эпизод аудирования v1 |
+| `szuper::material::theory` | Назначение reference: правило/объяснение |
+| `szuper::material::lexicon` | Словарные справочные данные, без отдельного раздела интерфейса |
+| `szuper::material::lesson` | Оригинал/допматериал урока |
+| `szuper::material::guide` | Инструкция или сведения о колоде |
+| `szuper::section::<key>` | Группа правил справочника |
+| `szuper::order::<integer>` | Порядок главы внутри справочника |
+| `szuper::type::vocab\|cloze\|fact\|term\|rule` | Необязательный тип знания; значение — один из перечисленных вариантов |
+| `szuper::confuse::<group>` | Узкая группа путаемых ответов для дистракторов |
+| `szuper::listening` | Старый формат выделенного аудирования |
+| `szuper::audio-language::<BCP-47>` | Объявленный язык аудио; при наличии имеет приоритет в ListeningMaterial |
+| `szuper::listening-target::<value>` | Старое текстовое уточнение цели аудирования |
 
-Служебные теги `lingodeck::…`, `marked`, `leech` темами не становятся; исключение —
-явный `lingodeck::topic::…`. Неизвестные служебные теги не создают автоматически
+Служебные теги `szuper::…`, `marked`, `leech` темами не становятся; исключение —
+явный `szuper::topic::…`. Неизвестные служебные теги не создают автоматически
 новых возможностей. Использовать нижний регистр для имён служебных тегов и
 значений enum; пользовательские темы сохраняют авторский регистр. Не задавать
 несколько противоречащих тегов одной роли. Не записывать проценты освоения,
@@ -147,13 +147,13 @@ Cloze записывается канонически: `{{c1::answer}}` или `
 ## 4. Теоретический справочник
 
 Обычная Basic-заметка: Front — заголовок, Back — HTML-фрагмент, теги
-`lingodeck::reference lingodeck::material::theory` и темы связанных упражнений.
+`szuper::reference szuper::material::theory` и темы связанных упражнений.
 Материал исключён из очереди и знаменателя освоения, чтение не создаёт FSRS-review.
 Путь интерфейса: «Теория → правило». Группы — заголовки плоского списка.
 
 Встроенные section keys: `foundations`, `nouns`, `cases`, `verbs`, `numbers`,
 `sentences`, `usage`, `other` в этом порядке. Другие значения — авторские группы;
-пробелы кодировать `_`. `lingodeck::order::10` задаёт целое число, иначе используется
+пробелы кодировать `_`. `szuper::order::10` задаёт целое число, иначе используется
 порядок карточек. У старых материалов назначение/раздел также угадываются по
 заголовку; новым явно задавать metadata, не полагаться на язык заголовка.
 
@@ -183,7 +183,7 @@ CSP и навигационная политика запрещают iframe, с
 
 ### 5.1 Модель
 
-Одна forward Basic-заметка с `lingodeck::dialogue` = один эпизод и одна итоговая
+Одна forward Basic-заметка с `szuper::dialogue` = один эпизод и одна итоговая
 оценка памяти. Front — заголовок, Back — **один** XML-корректный HTML-фрагмент
 `article`. `Audio` с `[sound:master.mp3]` рекомендуется для воспроизведения в Anki;
 источником нативного master остаётся атрибут article.
@@ -325,7 +325,7 @@ start. Промежутки тишины разрешены. Подсветка 
 язык. Произношение хранится в карточке; автоматическая IPA не равна выверенной
 фонетической транскрипции конкретного диктора. Происхождение указывать в Source.
 
-Старый формат `lingodeck::listening` использует обычные поля: Examples — транскрипт,
+Старый формат `szuper::listening` использует обычные поля: Examples — транскрипт,
 Extra — перевод, аудио — стандартное медиа, опционально audio-language/target.
 Он остаётся читаемым, но не получает настоящую пофразовую синхронизацию без
 диалоговых данных и таймингов. Новые длинные задания создавать как dialogue v1.
@@ -368,7 +368,7 @@ reader. Ручной скролл прекращает автоследован�
 ### 8.1 Авторский источник
 
 Для обновлений исходной колоды сохранять GUID заметки и ordinal шаблона.
-В пределах существующей колоды LingoDeck сопоставляет карточки по этим данным;
+В пределах существующей колоды Szuper сопоставляет карточки по этим данным;
 текст, теги и медиа можно обновлять, сохраняя память. GUID не выводить из
 изменяемого заголовка. Стабильные deck/model IDs полезны для Anki. Не считать
 переименованный корневой deck гарантированно тем же объектом приложения.
@@ -382,7 +382,7 @@ checkpoint. V1 не умеет семантически мигрировать �
 
 Экспорт — перенос учебного содержимого и текущего состояния памяти, **не побитовая
 копия исходной Anki-базы**. Исходные произвольные модели, JS/CSS шаблонов и все
-поля не гарантируются. Экспорт использует модель LingoDeck Basic с Front, Back,
+поля не гарантируются. Экспорт использует модель Szuper Basic с Front, Back,
 Hint, Extra, Source, Examples; медиа прикладываются. Содержимое dialogue Back и
 reference HTML сохраняется, как и теги и перечисленные роли полей.
 
@@ -456,8 +456,8 @@ reference-тегом, а не попыткой кодировать её как 
 2. Manifest содержит каждое используемое медиа, файл не пуст и декодируется.
 3. Master duration измерена; границы реплик проверены относительно окончательной записи.
 4. Каждый перевод соответствует своей фразе; вопросы имеют однозначный ответ в аудио.
-5. Открытие в Anki: Front/Back, media, без зависимости от LingoDeck JS.
-6. Импорт в LingoDeck: темы, синхронизация, подсказки, replay, квиз, результат.
+5. Открытие в Anki: Front/Back, media, без зависимости от Szuper JS.
+6. Импорт в Szuper: темы, синхронизация, подсказки, replay, квиз, результат.
 7. Реимпорт исправленной авторской колоды с теми же GUID сохраняет память.
 8. Отдельная проверка экспорта/импорта с учётом §8.2, без обещания сохранения всех моделей.
 
@@ -469,7 +469,7 @@ reference-тегом, а не попыткой кодировать её как 
 
 Демонстрационная структура; файлы и таймкоды для реальной колоды должны быть
 подготовлены по записи. Front: `At the café`. Теги:
-`lingodeck::dialogue Everyday::Cafe`. Audio: `[sound:cafe-master.mp3]`.
+`szuper::dialogue Everyday::Cafe`. Audio: `[sound:cafe-master.mp3]`.
 Source: авторство записи, дата, способ генерации/проверки произношения.
 
 ```html
@@ -501,12 +501,12 @@ Source: авторство записи, дата, способ генераци
 
 Пути от корня репозитория; при изменениях формата сначала сверять эти места:
 
-- `ios/Packages/LingoKit/Sources/LingoKit/Anki/{AnkiCollection,ApkgImporter,ApkgExporter,AnkiTemplateRenderer}.swift`
-- `ios/Packages/LingoKit/Sources/LingoKit/Session/{NoteContent,CardAnnotations,MaterialLibrary,ListeningMaterial,DialogueEpisode,DialogueTimeline}.swift`
+- `ios/Packages/SzuperKit/Sources/SzuperKit/Anki/{AnkiCollection,ApkgImporter,ApkgExporter,AnkiTemplateRenderer}.swift`
+- `ios/Packages/SzuperKit/Sources/SzuperKit/Session/{NoteContent,CardAnnotations,MaterialLibrary,ListeningMaterial,DialogueEpisode,DialogueTimeline}.swift`
 - `ios/App/Sources/ViewModels/LessonViewModel.swift`, `ios/App/Sources/Views/DialogueExerciseView.swift`
-- `android/data/src/main/java/com/lingodeck/data/anki/{ApkgImporter,ApkgExporter}.kt`
-- `android/core/src/main/kotlin/com/lingodeck/core/{DialogueEpisode,DialogueTimeline}.kt`
-- `android/app/src/main/java/com/lingodeck/app/ui/screens/DialogueEpisodeScreen.kt`
+- `android/data/src/main/java/com/szuper/data/anki/{ApkgImporter,ApkgExporter}.kt`
+- `android/core/src/main/kotlin/com/szuper/core/{DialogueEpisode,DialogueTimeline}.kt`
+- `android/app/src/main/java/com/szuper/app/ui/screens/DialogueEpisodeScreen.kt`
 
 Формат HTML версии 1 нельзя расширять обязательными данными, которые старый
 парсер интерпретирует иначе. Новые обязательные возможности требуют версии
@@ -515,17 +515,17 @@ Source: авторство записи, дата, способ генераци
 наличие само по себе не добавляет интерфейсную функцию.
 
 
-### Ordered textbooks in LingoDeck
+### Ordered textbooks in Szuper
 
 Use a learner-facing title such as `A2 · Перенести встречу` in Front and the chapter heading.
 Use the same topic name on the chapter and its study notes, with underscores for spaces.
 Keep episode Front, the dialogue heading and the level tag consistent.
 
-An optional integer tag `lingodeck::course-order::<N>` on a theory chapter orders its
+An optional integer tag `szuper::course-order::<N>` on a theory chapter orders its
 study topics and its section in the native apps. When multiple chapters share a topic
 or section, the earliest rank wins. Explicit ranks come first; unranked items use the
-existing fallback order. Use `lingodeck::order::<N>` for the chapter's reading order
+existing fallback order. Use `szuper::order::<N>` for the chapter's reading order
 within its section. Numbers need only appear in metadata. Stable practice groups
 continue to select the same exercises across a chapter rename.
 
-Deck Forge keeps evidence and production notes by GUID in the author project. Its distributed .apkg retains an empty Source field for model compatibility. The importer can still read provenance from other Anki packages.
+Szuper Forge keeps evidence and production notes by GUID in the author project. Its distributed .apkg retains an empty Source field for model compatibility. The importer can still read provenance from other Anki packages.

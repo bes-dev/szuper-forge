@@ -26,9 +26,9 @@ choice/true-false/select question, plausible distractors and an explanation.
 Keep each provider request within 2,000 characters; split on meaningful boundaries,
 not arbitrary character chunks. No mandatory long dictation.
 
-Set audio voices/budget from the authorized brief, then run `deck-forge audio PROJECT`
+Set audio voices/budget from the authorized brief, then run `szuper-forge audio PROJECT`
 for an offline plan. With enabled configuration and authorized generation run
-`deck-forge audio PROJECT --execute`. It generates `dialogues.json`, media and
+`szuper-forge audio PROJECT --execute`. It generates `dialogues.json`, media and
 source bindings. The key stays in the environment. Respect pending paid requests;
 never clear cache/ledger to force a retry. A missing key is not permission to
 retrieve a historical credential from another project.

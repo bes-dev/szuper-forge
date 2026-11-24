@@ -6,11 +6,11 @@ import wave
 import httpx
 import pytest
 
-from deck_forge.audio import generate, plan_audio, reconcile
-from deck_forge.common import ForgeError, read, write
-from deck_forge.dialogue import load_document
-from deck_forge.packaging import build
-from deck_forge.quality import run_qa
+from szuper_forge.audio import generate, plan_audio, reconcile
+from szuper_forge.common import ForgeError, read, write
+from szuper_forge.dialogue import load_document
+from szuper_forge.packaging import build
+from szuper_forge.quality import run_qa
 
 
 def enabled(demo, budget=10000):
@@ -207,9 +207,9 @@ def test_no_scripts_is_an_explicit_error(demo):
 
 
 def test_word_glosses_reuse_exact_synthesis_request(demo):
-    from deck_forge.audio import requests_for
-    from deck_forge.common import project
-    from deck_forge.models import Scripts, WordGloss
+    from szuper_forge.audio import requests_for
+    from szuper_forge.common import project
+    from szuper_forge.models import Scripts, WordGloss
 
     enabled(demo)
     config = project(demo)

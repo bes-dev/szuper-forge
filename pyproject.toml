@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lingodeck-forge"
+name = "szuper-forge"
 version = "0.2.0"
-description = "Agent harness for turning teaching materials into grounded Anki and LingoDeck decks."
+description = "Agent harness for turning teaching materials into grounded Anki and Szuper decks."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["genanki>=0.13.1,<0.14", "pydantic>=2.11,<3", "pypdf>=6,<7", "python-docx>=1.1,<2", "httpx>=0.28,<1"]
@@ -14,26 +14,25 @@ dependencies = ["genanki>=0.13.1,<0.14", "pydantic>=2.11,<3", "pypdf>=6,<7", "py
 dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
 
 [project.urls]
-Homepage = "https://bes-dev.com/lingodeck/"
-Documentation = "https://bes-dev.com/lingodeck/guide/"
-Repository = "https://github.com/bes-dev/deck-forge"
-Issues = "https://github.com/bes-dev/deck-forge/issues"
+Homepage = "https://bes-dev.com/szuper/"
+Documentation = "https://bes-dev.com/szuper/guide/"
+Repository = "https://github.com/bes-dev/szuper-forge"
+Issues = "https://github.com/bes-dev/szuper-forge/issues"
 
 [project.scripts]
-lingodeck-forge = "deck_forge.cli:main"
-deck-forge = "deck_forge.cli:main"
+szuper-forge = "szuper_forge.cli:main"
 
 # Ship the tool and its authoring instructions, never local course projects or credentials.
 [tool.hatch.build.targets.sdist]
 include = [
-  "/src/deck_forge/*.py", "/.agents/skills/**/SKILL.md",
+  "/src/szuper_forge/*.py", "/.agents/skills/**/SKILL.md",
   "/examples/create_demo.py", "/examples/materials/lesson.md",
   "/docs/*.md", "/docs/upstream.json", "/schemas/*.json", "/tests/*.py",
   "/AGENTS.md", "/CLAUDE.md", "/README.md", "/setup.sh", "/uv.lock", "/.env.example",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/deck_forge"]
+packages = ["src/szuper_forge"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

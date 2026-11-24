@@ -74,12 +74,12 @@ def status(root):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Agent-oriented Anki/LingoDeck deck factory. Content comes from your agent; tools verify and build it."
+        description="Agent-oriented Anki/Szuper deck factory. Content comes from your agent; tools verify and build it."
     )
     from importlib.metadata import version
 
     parser.add_argument(
-        "--version", action="version", version="LingoDeck Forge " + version("lingodeck-forge")
+        "--version", action="version", version="Szuper Forge " + version("szuper-forge")
     )
     commands = parser.add_subparsers(dest="command", required=True)
     p = commands.add_parser("init")

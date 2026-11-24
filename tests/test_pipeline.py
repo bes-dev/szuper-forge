@@ -7,11 +7,11 @@ import zipfile
 
 import pytest
 
-from deck_forge.cli import initialize
-from deck_forge.common import ForgeError, ProjectLock, read, write
-from deck_forge.materials import attach_text, extract, html_text
-from deck_forge.packaging import build
-from deck_forge.quality import run_qa
+from szuper_forge.cli import initialize
+from szuper_forge.common import ForgeError, ProjectLock, read, write
+from szuper_forge.materials import attach_text, extract, html_text
+from szuper_forge.packaging import build
+from szuper_forge.quality import run_qa
 
 
 def notes_in_package(path):
@@ -34,7 +34,7 @@ def test_materials_to_real_mixed_anki_package_without_keys(demo, monkeypatch):
     result = build(demo, demo / "dist/demo.apkg")
     notes, cards = notes_in_package(result["output"])
     assert len(notes) == 6 and cards == 9
-    assert any("lingodeck::reference" in row[2] for row in notes)
+    assert any("szuper::reference" in row[2] for row in notes)
     assert any("{{c1::please}}" in row[1] for row in notes)
     fields = next(f.split("\x1f") for _, f, _ in notes if f.startswith("tea\x1f"))
     assert fields[2] == fields[4] == ""
@@ -195,7 +195,7 @@ def test_project_write_lock(demo):
 
 def test_cli_works_from_an_unrelated_working_directory(demo, tmp_path):
     result = subprocess.run(
-        [sys.executable, "-m", "deck_forge.cli", "status", str(demo)],
+        [sys.executable, "-m", "szuper_forge.cli", "status", str(demo)],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -264,8 +264,8 @@ def test_editorial_review_and_chapter_sequence(demo):
     )
     draft["notes"].append(earlier)
     draft["notes"][0]["hint"] = "Как указано на слайде 4"
-    chapter["tags"].remove("lingodeck::practice::cafe-order")
-    chapter["tags"].append("lingodeck::practice::missing")
+    chapter["tags"].remove("szuper::practice::cafe-order")
+    chapter["tags"].append("szuper::practice::missing")
     draft["notes"][1]["examples"] = "I give a presentation on Fridays."
     write(demo / "deck.json", draft)
     qa = run_qa(demo)
@@ -274,7 +274,7 @@ def test_editorial_review_and_chapter_sequence(demo):
     assert any("practice link" in w for w in qa["warnings"])
     assert not any("coffee.examples" in w for w in qa["warnings"])
     draft["notes"][0]["hint"] = ""
-    chapter["tags"][-1] = "lingodeck::practice::cafe-order"
+    chapter["tags"][-1] = "szuper::practice::cafe-order"
     write(demo / "deck.json", draft)
     build(demo, demo / "dist/ordered.apkg")
     preview = (demo / "reports/preview.html").read_text()
@@ -285,7 +285,7 @@ def test_editorial_review_and_chapter_sequence(demo):
 
 
 def test_back_to_back_builds_only_advance_edited_note_timestamps(demo, monkeypatch):
-    monkeypatch.setattr("deck_forge.packaging.time.time", lambda: 1800000000)
+    monkeypatch.setattr("szuper_forge.packaging.time.time", lambda: 1800000000)
 
     def revisions(name):
         path = demo / "dist" / name

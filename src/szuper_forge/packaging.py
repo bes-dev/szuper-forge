@@ -149,7 +149,7 @@ def prepare_release(root, output, staged, pending, check_audio):
             ]
         models[kind] = genanki.Model(
             config.model_id + offset,
-            f"Deck Forge · {kind}",
+            f"Szuper Forge · {kind}",
             fields=fields,
             templates=templates,
             model_type=genanki.Model.CLOZE if kind == "cloze" else genanki.Model.FRONT_BACK,
@@ -176,9 +176,9 @@ def prepare_release(root, output, staged, pending, check_audio):
     for note in draft.notes:
         tags = set(note.tags)
         if note.kind == "reference":
-            tags.add("lingodeck::reference")
-            if not any(t.startswith("lingodeck::material::") for t in tags):
-                tags.add("lingodeck::material::theory")
+            tags.add("szuper::reference")
+            if not any(t.startswith("szuper::material::") for t in tags):
+                tags.add("szuper::material::theory")
         source = evidence_for(note.source_item_ids)
         if note.provenance:
             source += "\n" + note.provenance
@@ -206,7 +206,7 @@ def prepare_release(root, output, staged, pending, check_audio):
         _, rows = load_document(ready)
         dialogue_model = genanki.Model(
             config.model_id + 3,
-            "Deck Forge · Dialogue v1",
+            "Szuper Forge · Dialogue v1",
             fields=[{"name": n} for n in ("Front", "Back", "Audio", "Source")],
             templates=[
                 {
@@ -228,7 +228,7 @@ def prepare_release(root, output, staged, pending, check_audio):
                     model=dialogue_model,
                     guid=identity,
                     fields=values,
-                    tags=sorted(set(e["tags"]) | {"lingodeck::dialogue"}),
+                    tags=sorted(set(e["tags"]) | {"szuper::dialogue"}),
                 )
             )
             expected[identity] = values
@@ -284,7 +284,7 @@ def prepare_release(root, output, staged, pending, check_audio):
         for _, _, _, chapter in sorted((c for c in chapters if c[0] == section), key=lambda c: c[2]):
             contents.append(f"<details><summary>{chapter.front}</summary>{chapter.back}</details>")
     write(pending / "provenance.json", evidence)
-    # CSP keeps authored preview content offline even before import into LingoDeck.
+    # CSP keeps authored preview content offline even before import into Szuper.
     preview_html = (
         "<!doctype html><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; base-uri 'none'\"><title>Deck review</title><style>"
         + CSS
@@ -313,7 +313,7 @@ def prepare_release(root, output, staged, pending, check_audio):
             ),
             "removed": sorted(previous.keys() - fingerprints.keys()),
         },
-        "manual_review": "Not automatically asserted: open preview, listen, check Anki/LingoDeck",
+        "manual_review": "Not automatically asserted: open preview, listen, check Anki/Szuper",
     }
     write(pending / "release.json", result)
     return {

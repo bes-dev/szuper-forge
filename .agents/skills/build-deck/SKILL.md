@@ -1,6 +1,6 @@
 ---
 name: build-deck
-description: Create or update an Anki/LingoDeck .apkg from teacher notes, a lesson, or course materials. Use for personal lesson updates and complete ordered courses, including optional listening.
+description: Create or update an Anki/Szuper .apkg from teacher notes, a lesson, or course materials. Use for personal lesson updates and complete ordered courses, including optional listening.
 ---
 
 # Build or update a deck

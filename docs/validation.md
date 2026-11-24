@@ -34,7 +34,7 @@ A provider alignment matching the transcript is not a substitute for listening.
 Generated IPA is not a human-checked transcription of a particular speaker.
 
 The HTML preview is for content inspection, not the mobile app's exact native UI.
-Open the package in Anki/LingoDeck for actual rendering and interactions. Runtime
+Open the package in Anki/Szuper for actual rendering and interactions. Runtime
 checkpoint playback progress is not a portable Anki scheduling field. Mobile
 export limitations are documented in [the format specification](deck-format.md).
 

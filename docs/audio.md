@@ -23,7 +23,7 @@ Russian or English voice. It submits the source BCP-47 primary language as the
 provider ISO-639-1 hint when it is two letters; it preserves the full authored
 language code in the final note. Language/model support still depends on provider.
 
-`deck-forge audio PROJECT` is always an offline plan. `--execute` and enabled
+`szuper-forge audio PROJECT` is always an offline plan. `--execute` and enabled
 configuration trigger requests only within the declared cumulative character
 ceiling. A project initialized with audio disabled makes no requests.
 The agent can proceed when the user's generation request, voices and budget are
@@ -86,8 +86,8 @@ written to requests, payload hashes, ledgers or cached response metadata.
 4. If the user explicitly authorizes a possible paid retry, use:
 
 ```sh
-deck-forge audio-reconcile PROJECT --request HASH --allow-paid-retry
-deck-forge audio PROJECT --execute
+szuper-forge audio-reconcile PROJECT --request HASH --allow-paid-retry
+szuper-forge audio PROJECT --execute
 ```
 
 The old reservation remains counted; increase the project ceiling only if the
@@ -109,7 +109,7 @@ Provide `sources/listening-bindings.json`:
 ```
 
 If `scripts.json` also contains episodes, bindings must additionally contain
-`scripts_sha256`, computed using `deck_forge.common.digest` of
+`scripts_sha256`, computed using `szuper_forge.common.digest` of
 `Scripts.model_validate(...).model_dump(mode="json")`. This prevents stale script
 updates from silently reusing old authored media. When adopting an external ready
 format without an untimed source script, leave scripts episodes empty.

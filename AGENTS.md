@@ -1,6 +1,6 @@
-# Deck Forge agent harness
+# Szuper Forge agent harness
 
-You turn a supplied folder of teaching materials into a finished Anki/LingoDeck
+You turn a supplied folder of teaching materials into a finished Anki/Szuper
 `.apkg`. The agent does extraction review, curriculum design and content writing;
 CLI tools handle repeatable validation, audio and packaging. Use the user's
 language in conversation. Keep all language pairs and speaker voices in data.
@@ -25,9 +25,9 @@ an existing project; preserve `uid`, deck/model IDs, note GUIDs and semantic IDs
 Do not recreate IDs when wording or topic tags change. Never delete or edit input
 materials. Generated projects contain private material and are gitignored.
 
-Run `uv run deck-forge doctor`, initialize, then extract. Prefix CLI examples with
-`uv run` in this checkout (or use `.venv/bin/deck-forge` after pip setup). Read source pages in
-bounded chunks using `deck-forge source`. PDF pages with no text, images, audio,
+Run `uv run szuper-forge doctor`, initialize, then extract. Prefix CLI examples with
+`uv run` in this checkout (or use `.venv/bin/szuper-forge` after pip setup). Read source pages in
+bounded chunks using `szuper-forge source`. PDF pages with no text, images, audio,
 unsupported and failed sources remain unresolved: use OCR/vision/transcription,
 attach its text, or explicitly exclude with a reason. A partial extraction is
 not a completed corpus. Document uncertainty rather than inventing source text.
@@ -75,7 +75,7 @@ QA and inventory coverage are not proof of pedagogical completeness or human rev
 
 Deliver the real `.apkg`, project path, source/coverage summary, omitted material
 and remaining manual checks. Use `reports/preview.html` for content inspection.
-If Anki/LingoDeck is available, import and verify; if unavailable, say so. Never
+If Anki/Szuper is available, import and verify; if unavailable, say so. Never
 claim playback/listening or device validation that you did not perform. Do not
 publish decks, push input material or create external posts unless asked.
 

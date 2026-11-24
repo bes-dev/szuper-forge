@@ -61,7 +61,7 @@ def identity(deck, episode):
         require(not any(c.isspace() for c in guid), "guid must not contain whitespace")
         return guid
     # Never include editable title/text/tags in the identity seed.
-    seed = f"lingodeck-dialogue-v1:{deck['id']}:{episode['id']}"
+    seed = f"szuper-dialogue-v1:{deck['id']}:{episode['id']}"
     return hashlib.sha256(seed.encode()).hexdigest()[:20]
 
 
@@ -331,7 +331,7 @@ def load_document(path):
             f"{eid}: tags must be nonempty tokens",
         )
         require(
-            not any(t.lower() == "lingodeck::reference" for t in e["tags"]),
+            not any(t.lower() == "szuper::reference" for t in e["tags"]),
             f"{eid}: cannot mix reference and dialogue",
         )
         require(isinstance(e["segments"], list), f"{eid}: segments must be an array")
@@ -421,7 +421,7 @@ def package(deck, rows, base, destination):
     )
     model = genanki.Model(
         deck["model_id"],
-        "LingoDeck Dialogue v1 · Basic",
+        "Szuper Dialogue v1 · Basic",
         fields=[{"name": n} for n in ("Front", "Back", "Audio", "Source")],
         templates=[
             {
@@ -445,7 +445,7 @@ def package(deck, rows, base, destination):
                     "[sound:" + episode["audio"] + "]",
                     html.escape(episode["source"]),
                 ],
-                tags=sorted(set(episode["tags"]) | {"lingodeck::dialogue"}),
+                tags=sorted(set(episode["tags"]) | {"szuper::dialogue"}),
             )
         )
         media.update(files)
@@ -471,7 +471,7 @@ def package(deck, rows, base, destination):
             originals = {guid: source for _, guid, source, _ in rows}
             for guid, fields, tags in notes:
                 require(fields.split("\x1f")[1] == originals[guid], "Packaged Back/GUID differs")
-                require("lingodeck::dialogue" in tags.split(), "Packaged dialogue tag missing")
+                require("szuper::dialogue" in tags.split(), "Packaged dialogue tag missing")
                 validate_html(fields.split("\x1f")[1])
             require(
                 db.execute("SELECT COUNT(*) FROM cards WHERE ord=0").fetchone()[0] == len(rows),

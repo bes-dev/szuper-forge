@@ -3,8 +3,8 @@ import xml.etree.ElementTree as ET
 import pytest
 from pydantic import ValidationError
 
-from deck_forge.dialogue import Invalid, phrase_markup, word_glosses
-from deck_forge.models import Phrase
+from szuper_forge.dialogue import Invalid, phrase_markup, word_glosses
+from szuper_forge.models import Phrase
 
 
 def test_authored_unicode_glosses_do_not_change_audio_text():

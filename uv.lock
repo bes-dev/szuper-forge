@@ -140,7 +140,7 @@ wheels = [
 ]
 
 [[package]]
-name = "lingodeck-forge"
+name = "szuper-forge"
 version = "0.2.0"
 source = { editable = "." }
 dependencies = [

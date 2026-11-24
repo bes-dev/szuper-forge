@@ -7,10 +7,10 @@ Commands are deterministic tools around that work. All paths below are local.
 ## 1. Initialize or resume
 
 ```sh
-uv run deck-forge init decks/my-course --materials '/path/to/materials' \
+uv run szuper-forge init decks/my-course --materials '/path/to/materials' \
   --name 'My course' --source-language de --translation-language pl --level A2
-uv run deck-forge extract decks/my-course
-uv run deck-forge status decks/my-course
+uv run szuper-forge extract decks/my-course
+uv run szuper-forge status decks/my-course
 ```
 
 Project directory must be outside the input folder. Existing projects are resumed,
@@ -22,7 +22,7 @@ All machine-readable artifact contracts are in [`../schemas/`](../schemas/).
 Regenerate after changing models:
 
 ```sh
-uv run deck-forge schemas --output schemas
+uv run szuper-forge schemas --output schemas
 ```
 
 ## 2. Read source inventory
@@ -39,7 +39,7 @@ vision/transcription output. Changed files are re-extracted and old evidence mus
 be rechecked. Renaming a file changes its source ID.
 
 ```sh
-uv run deck-forge source decks/my-course src-ID --page 3 --offset 0 --limit 12000
+uv run szuper-forge source decks/my-course src-ID --page 3 --offset 0 --limit 12000
 ```
 
 No PDF page text: `needs-ocr`; image: `needs-vision`; audio: `needs-transcription`.
@@ -47,14 +47,14 @@ Use OCR if installed:
 
 ```sh
 # Supply installed Tesseract language packs, not arbitrary BCP-47 codes.
-uv run deck-forge extract decks/my-course --ocr-language deu+eng
+uv run szuper-forge extract decks/my-course --ocr-language deu+eng
 ```
 
 Scanned PDF OCR needs `pdftoppm` (Poppler) and Tesseract. Otherwise have the agent
 inspect the original image/PDF with its own capabilities and write faithful text:
 
 ```sh
-uv run deck-forge attach-text decks/my-course --source-id src-ID --page 3 \
+uv run szuper-forge attach-text decks/my-course --source-id src-ID --page 3 \
   --text /path/to/transcribed-page.txt --method agent-vision
 ```
 
@@ -149,8 +149,8 @@ See [the runnable demo](../examples/create_demo.py) for all artifact shapes.
 ## 6. Validate and package
 
 ```sh
-uv run deck-forge qa decks/my-course --check-audio
-uv run deck-forge build decks/my-course --output decks/my-course/dist/v1.apkg
+uv run szuper-forge qa decks/my-course --check-audio
+uv run szuper-forge build decks/my-course --output decks/my-course/dist/v1.apkg
 ```
 
 Build always re-runs QA and audio decoding for generated listening. No API calls
@@ -159,7 +159,7 @@ are reopened and compared before the final package appears. Existing release
 files are not overwritten: use a new filename while retaining semantic IDs.
 
 Outputs: `.apkg`, `reports/qa.json`, `reports/release.json`, `reports/preview.html`.
-Inspect content and import into available Anki/LingoDeck. Device playback and
+Inspect content and import into available Anki/Szuper. Device playback and
 human listening review are separate checks; report them honestly.
 
 All mutating CLI stages use `.forge.lock` to avoid concurrent project writers.
