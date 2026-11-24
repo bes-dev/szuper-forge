@@ -219,3 +219,20 @@ def test_word_glosses_reuse_exact_synthesis_request(demo):
     end = len(phrase.text.split()[0].rstrip(".,!?"))
     phrase.words = [WordGloss(start=0, end=end, translation="A contextual gloss")]
     assert requests_for(config, scripts) == before
+
+
+def test_lost_paid_cache_requires_explicit_retry(demo, monkeypatch):
+    enabled(demo)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "test-key")
+    calls = []
+    with mock_client(calls) as client:
+        generate(demo, execute=True, client=client)
+        (cached,) = (demo / ".cache/elevenlabs").glob("*.json")
+        cached.unlink()
+        assert plan_audio(demo)["unresolved_requests"] == [cached.stem]
+        with pytest.raises(ForgeError, match="Unresolved paid"):
+            generate(demo, execute=True, client=client)
+        assert len(calls) == 1
+        reconcile(demo, cached.stem, True)
+        generate(demo, execute=True, client=client)
+        assert len(calls) == 2

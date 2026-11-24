@@ -153,3 +153,5 @@ See dialogue format §5.3.1; native ranges are derived from HTML, not serialized
 Python indices. Both mobile apps underline clickable words with a dashed line,
 pause for lookup and show a small anchored bubble. Whole-phrase meaning remains
 separate, and word help is included in the lesson assistance state.
+
+If a previously paid response disappears from the cache, the next run reports its request hash as unresolved. Restore the cached response from backup or deliberately authorize another paid attempt with `audio-reconcile` after checking provider history. The earlier character reservation still counts.

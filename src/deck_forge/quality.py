@@ -80,15 +80,12 @@ def expand_media(root, names):
     return result
 
 
-def source_description(item_ids, plan, manifest):
-    items = {i.id: i for i in plan.items}
-    sources = {s["id"]: s for s in manifest["sources"]}
-    lines = []
-    for iid in item_ids:
-        for ref in items[iid].refs:
-            name = sources[ref.source_id]["path"]
-            lines.append(f"{name}, p. {ref.page or 1}: {ref.quote}")
-    return "\n".join(dict.fromkeys(lines))
+def source_descriptions(plan, manifest):
+    paths = {source["id"]: source["path"] for source in manifest["sources"]}
+    return {
+        item.id: [f"{paths[ref.source_id]}, p. {ref.page or 1}: {ref.quote}" for ref in item.refs]
+        for item in plan.items
+    }
 
 
 def run_qa(root, check_audio=False, preparing_audio=False):

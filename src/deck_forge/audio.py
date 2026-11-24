@@ -69,7 +69,7 @@ def plan_audio(root):
     unresolved = [
         a["key"]
         for a in ledger["attempts"]
-        if a["state"] == "started" and a["key"] in {r["key"] for r in uncached}
+        if a["state"] in {"started", "complete"} and a["key"] in {r["key"] for r in uncached}
     ]
     result = {
         "provider": "ElevenLabs",
@@ -175,7 +175,7 @@ def fetch_response(root, req, key, client):
     ledger_path = root / "audio-ledger.json"
     ledger = read(ledger_path) if ledger_path.exists() else {"attempts": []}
     check(
-        not any(a["key"] == req["key"] and a["state"] == "started" for a in ledger["attempts"]),
+        not any(a["key"] == req["key"] and a["state"] in {"started", "complete"} for a in ledger["attempts"]),
         "Unresolved paid request; inspect provider history and use audio-reconcile before an intentional retry",
     )
     check(key, "ELEVENLABS_API_KEY is not set. No audio request was sent.")
@@ -199,7 +199,11 @@ def fetch_response(root, req, key, client):
             f"ElevenLabs HTTP {response.status_code}. Request left unresolved; no automatic paid retry.",
         )
         data = response.json()
-        audio = base64.b64decode(data.get("audio_base64", ""), validate=True)
+        check(
+            isinstance(data, dict) and isinstance(data.get("audio_base64"), str),
+            "Invalid provider response; request left unresolved, no automatic paid retry",
+        )
+        audio = base64.b64decode(data["audio_base64"], validate=True)
         check(bool(audio), "ElevenLabs returned no audio")
         # Persist successful output before processing so local failures never trigger a second paid call.
         write(target, data)
@@ -318,7 +322,13 @@ def reconcile(root, request_key, allow_paid_retry):
     ledger = read(path)
     matched = False
     for attempt in ledger["attempts"]:
-        if attempt["key"] == request_key and attempt["state"] == "started":
+        if attempt["key"] == request_key and (
+            attempt["state"] == "started"
+            or (
+                attempt["state"] == "complete"
+                and not (Path(root) / ".cache/elevenlabs" / (request_key + ".json")).is_file()
+            )
+        ):
             attempt["state"] = "retry-authorized"
             matched = True
     check(matched, "No unresolved request with this hash")

@@ -36,7 +36,9 @@ def initialize(root, materials, name, source_language, translation_language, lev
     write(root / "plan.json", {"items": [], "excluded_items": [], "excluded_sources": []})
     write(root / "deck.json", {"notes": []})
     write(root / "scripts.json", {"episodes": []})
-    (root / ".gitignore").write_text(".cache/\nmedia/\ndist/\n.env*\naudio-ledger.json\nsources/\nreports/provenance.json\n")
+    (root / ".gitignore").write_text(
+        ".cache/\nmedia/\ndist/\n.env*\naudio-ledger.json\nsources/\nreports/provenance.json\n"
+    )
     return {
         "project": str(root),
         "next": "extract, then have your agent author plan.json, deck.json and optional scripts.json",
@@ -73,6 +75,11 @@ def status(root):
 def main():
     parser = argparse.ArgumentParser(
         description="Agent-oriented Anki/LingoDeck deck factory. Content comes from your agent; tools verify and build it."
+    )
+    from importlib.metadata import version
+
+    parser.add_argument(
+        "--version", action="version", version="LingoDeck Forge " + version("lingodeck-forge")
     )
     commands = parser.add_subparsers(dest="command", required=True)
     p = commands.add_parser("init")

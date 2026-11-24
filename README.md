@@ -1,4 +1,4 @@
-# Deck Forge
+# LingoDeck Forge
 
 A local agent harness that turns a folder of teaching materials into a grounded,
 reviewable **Anki `.apkg`**, including LingoDeck theory pages and optional
@@ -13,16 +13,24 @@ Inspired by [etnamute](https://github.com/bes-dev/etnamute): short commands, sha
 pipeline instructions, durable artifacts, explicit QA before delivery. This is an
 independent implementation for learning materials, not an app builder.
 
+[Project and support](https://bes-dev.com/lingodeck/) · [Deck creation guide](https://bes-dev.com/lingodeck/guide/) · [Privacy](https://bes-dev.com/lingodeck/privacy/) · [Terms](https://bes-dev.com/lingodeck/terms/)
+
 ## Start
 
 Python 3.11+ and [uv](https://docs.astral.sh/uv/) or pip:
 
 ```sh
+git clone https://github.com/bes-dev/deck-forge.git
+cd deck-forge
 ./setup.sh
-# or: uv sync --extra dev && uv run deck-forge doctor
+# or: uv sync --frozen && uv run --frozen lingodeck-forge doctor
 ```
 
-Or `python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'`.
+Or `python3 -m venv .venv && .venv/bin/pip install -e .`.
+
+The source checkout includes the agent skills and worked example. A wheel installs the CLI for scripted use.
+
+Both `lingodeck-forge` and the original `deck-forge` command run the same CLI. Keep using the existing project folder when updating a deck.
 
 Open this repository with Codex, Claude Code, or another file/terminal-capable
 agent, and ask:
@@ -170,8 +178,8 @@ both mobile parsers before changing the version contract.
 
 ```sh
 uv sync --extra dev
-uv run pytest
-uv run ruff check .
+uv run --extra dev pytest
+uv run --extra dev ruff check .
 ```
 
 Tests use local teaching fixtures and mocked provider responses. They exercise

@@ -282,3 +282,45 @@ def test_editorial_review_and_chapter_sequence(demo):
     assert "lesson.md" not in preview
     assert "{{c1::" not in preview
     assert "<summary>чай</summary>" in preview
+
+
+def test_back_to_back_builds_only_advance_edited_note_timestamps(demo, monkeypatch):
+    monkeypatch.setattr("deck_forge.packaging.time.time", lambda: 1800000000)
+
+    def revisions(name):
+        path = demo / "dist" / name
+        build(demo, path)
+        notes_in_package(path)
+        with sqlite3.connect(path.with_suffix(".sqlite")) as db:
+            return dict(db.execute("select guid,mod from notes"))
+
+    first = revisions("first.apkg")
+    cards = read(demo / "deck.json")
+    cards["notes"][0]["extra"] = "An alternative example."
+    write(demo / "deck.json", cards)
+    second = revisions("second.apkg")
+    assert first.keys() == second.keys()
+    assert sorted(second[k] - first[k] for k in first) == [0, 0, 0, 0, 0, 1]
+
+
+def test_release_report_failure_preserves_previous_build(demo, monkeypatch):
+    first = demo / "dist/first.apkg"
+    build(demo, first)
+    reports = demo / "reports"
+    originals = {
+        name: (reports / name).read_bytes() for name in ("release.json", "preview.html", "provenance.json")
+    }
+    dest = demo / "dist/second.apkg"
+    replace = Path.replace
+
+    def fail_last(self, target):
+        if self.name == "release.json" and Path(target) == reports / "release.json":
+            raise OSError("write failed")
+        return replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", fail_last)
+    with pytest.raises(OSError, match="write failed"):
+        build(demo, dest)
+    assert not dest.exists()
+    assert first.is_file()
+    assert {name: (reports / name).read_bytes() for name in originals} == originals

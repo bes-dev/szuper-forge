@@ -64,7 +64,7 @@ review. Report manual checks as performed/pending rather than fabricating a scor
 
 ## Regression suite
 
-Run `uv run pytest` and `uv run ruff check .`. Tests cover mixed Anki models,
+Run `uv run --extra dev pytest` and `uv run --extra dev ruff check .`. Tests cover mixed Anki models,
 source grounding, changes/unread sources, identity preservation, container/media
 integrity, arbitrary language pairs, real local decoding, script fingerprints,
 provider error recovery, cache reuse and pre-request budget enforcement.

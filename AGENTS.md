@@ -81,7 +81,7 @@ publish decks, push input material or create external posts unless asked.
 
 ## Developing this harness
 
-Run `uv run pytest` and `uv run ruff check .` after relevant changes. Tests must
+Run `uv run --extra dev pytest` and `uv run --extra dev ruff check .` after relevant changes. Tests must
 verify observable contracts: grounding, identity, container integrity, alignment,
 budget/cache behavior and refusal of invalid releases. Keep extraction statuses
 and supported formats honest. Contract changes require docs/schema/tool updates.

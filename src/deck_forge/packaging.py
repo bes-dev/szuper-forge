@@ -1,4 +1,12 @@
 from __future__ import annotations
+from contextlib import closing
+import errno
+import hashlib
+import itertools
+import json
+import os
+import shutil
+import time
 import html
 import re
 from pathlib import Path
@@ -10,7 +18,7 @@ import genanki
 from .common import check, digest, guid, local_file, read, write
 from .editorial import rank, tag_values
 from .dialogue import load_document
-from .quality import load_artifacts, note_media, run_qa, source_description, expand_media
+from .quality import load_artifacts, note_media, run_qa, source_descriptions, expand_media
 
 CSS = "body{font:20px/1.6 -apple-system,sans-serif;text-align:left;padding:20px}img,audio{max-width:100%}table{border-collapse:collapse}td,th{border:1px solid #aaa;padding:8px}label{display:block;padding:8px}section{margin:24px 0}"
 
@@ -51,9 +59,65 @@ def practice_preview(note):
     )
 
 
+def publish_package(staged, output):
+    try:
+        os.link(staged, output)
+    except FileExistsError as exc:
+        raise ValueError("Output exists; choose a new release filename") from exc
+    except OSError as exc:
+        if exc.errno not in {errno.ENOTSUP, errno.EPERM, errno.ENOSYS}:
+            raise
+        # Some removable volumes lack hard links. Reserve the name exclusively
+        # before replacing our own empty file with the verified package.
+        with output.open("xb"):
+            pass
+        try:
+            staged.replace(output)
+        except OSError:
+            output.unlink(missing_ok=True)
+            raise
+
+
 def build(root, output, check_audio=True):
     root, output = Path(root), Path(output)
     check(not output.exists(), "Output exists; choose a new release filename")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    reports = root / "reports"
+    reports.mkdir(exist_ok=True)
+    with (
+        tempfile.TemporaryDirectory(dir=output.parent) as package_dir,
+        tempfile.TemporaryDirectory(dir=reports) as report_dir,
+    ):
+        staged = Path(package_dir) / "deck.apkg"
+        pending = Path(report_dir)
+        result = prepare_release(root, output, staged, pending, check_audio)
+        names = ["provenance.json", "preview.html", "release.json"]
+        prior = {}
+        for name in names:
+            target = reports / name
+            if target.exists():
+                # Keep the previous reports available if a later rename fails.
+                backup = pending / ("prior-" + name)
+                shutil.copyfile(target, backup)
+                prior[name] = backup
+        published = []
+        publish_package(staged, output)
+        try:
+            for name in names:
+                (pending / name).replace(reports / name)
+                published.append(name)
+        except OSError:
+            for name in reversed(published):
+                if name in prior:
+                    prior[name].replace(reports / name)
+                else:
+                    (reports / name).unlink()
+            output.unlink()
+            raise
+        return result
+
+
+def prepare_release(root, output, staged, pending, check_audio):
     report = run_qa(root, check_audio)
     check(report["passed"], "QA failed: " + "; ".join(report["errors"]))
     config, manifest, plan, draft, _ = load_artifacts(root)
@@ -96,17 +160,26 @@ def build(root, output, check_audio=True):
     evidence, fingerprints, chapters = {}, {}, []
     previous_path = root / "reports/release.json"
     previous = None
+    previous_times = {}
+    release_time = int(time.time())
     if previous_path.exists():
         release = read(previous_path)
         if release.get("project_uid") == config.uid:
             previous = release.get("note_fingerprints")
+            previous_times = release.get("note_modifications", {})
+            release_time = max(release_time, release.get("release_time", 0) + 1)
+    evidence_by_item = source_descriptions(plan, manifest)
+
+    def evidence_for(item_ids):
+        return "\n".join(dict.fromkeys(line for item_id in item_ids for line in evidence_by_item[item_id]))
+
     for note in draft.notes:
         tags = set(note.tags)
         if note.kind == "reference":
             tags.add("lingodeck::reference")
             if not any(t.startswith("lingodeck::material::") for t in tags):
                 tags.add("lingodeck::material::theory")
-        source = source_description(note.source_item_ids, plan, manifest)
+        source = evidence_for(note.source_item_ids)
         if note.provenance:
             source += "\n" + note.provenance
         identity = guid(config, note)
@@ -146,9 +219,7 @@ def build(root, output, check_audio=True):
         )
         bindings = read(root / "sources/listening-bindings.json")["episodes"]
         for e, identity, markup, files in rows:
-            source = (
-                source_description(bindings[e["id"]]["source_item_ids"], plan, manifest) + "\n" + e["source"]
-            )
+            source = evidence_for(bindings[e["id"]]["source_item_ids"]) + "\n" + e["source"]
             evidence[identity] = source
             values = [html.escape(e["title"]), markup, "[sound:" + e["audio"] + "]", ""]
             fingerprints[identity] = digest(["dialogue", values, sorted(e["tags"])])
@@ -163,29 +234,46 @@ def build(root, output, check_audio=True):
             expected[identity] = values
             media.update(files)
             preview.append(markup)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(dir=output.parent) as tmp:
-        staged = Path(tmp) / "deck.apkg"
+    with tempfile.TemporaryDirectory(dir=staged.parent) as tmp:
         package = genanki.Package(deck)
-        package.media_files = [str(local_file(root / "media", n)) for n in sorted(media)]
-        package.write_to_file(str(staged))
-        with zipfile.ZipFile(staged) as archive:
-            mapping = __import__("json").loads(archive.read("media"))
-            check(set(mapping.values()) == media, "Package media manifest differs")
+        mapping = {str(i): name for i, name in enumerate(sorted(media))}
+        db_path = Path(tmp) / "collection.anki2"
+        modifications = {
+            identity: previous_times.get(identity, release_time)
+            if previous and previous.get(identity) == fingerprint
+            else release_time
+            for identity, fingerprint in fingerprints.items()
+        }
+        # Own the staging database so source content is also cleaned up on failure.
+        with closing(sqlite3.connect(db_path)) as db, db:
+            package.write_to_db(db.cursor(), release_time, itertools.count(release_time * 1000))
+            db.executemany("UPDATE notes SET mod=? WHERE guid=?", ((v, k) for k, v in modifications.items()))
+        with zipfile.ZipFile(staged, "w") as archive:
+            archive.write(db_path, "collection.anki2")
+            archive.writestr("media", json.dumps(mapping, ensure_ascii=False))
             for key, name in mapping.items():
+                archive.write(local_file(root / "media", name), key)
+        with zipfile.ZipFile(staged) as archive:
+            check(json.loads(archive.read("media")) == mapping, "Package media manifest differs")
+            for key, name in mapping.items():
+                with archive.open(key) as packed, local_file(root / "media", name).open("rb") as source_file:
+                    check(
+                        hashlib.file_digest(packed, "sha256").digest()
+                        == hashlib.file_digest(source_file, "sha256").digest(),
+                        "Media bytes changed during packaging",
+                    )
+            with archive.open("collection.anki2") as packed, db_path.open("rb") as source_file:
                 check(
-                    archive.read(key) == local_file(root / "media", name).read_bytes(),
-                    "Media bytes changed during packaging",
+                    hashlib.file_digest(packed, "sha256").digest()
+                    == hashlib.file_digest(source_file, "sha256").digest(),
+                    "Packaged database differs",
                 )
-            db_path = Path(tmp) / "collection.sqlite"
-            db_path.write_bytes(archive.read("collection.anki2"))
-        with sqlite3.connect(db_path) as db:
+        with closing(sqlite3.connect(db_path)) as db:
             notes = db.execute("SELECT guid, flds FROM notes").fetchall()
             check(len(notes) == len(expected), "Packaged note count differs")
             for identity, values in notes:
                 check(values.split("\x1f") == expected[identity], "Packaged field/GUID mismatch")
             card_count = db.execute("SELECT COUNT(*) FROM cards").fetchone()[0]
-        staged.replace(output)
     section_ranks = {}
     for section, course_rank, _, _ in chapters:
         section_ranks[section] = min(section_ranks.get(section, float("inf")), course_rank)
@@ -195,7 +283,7 @@ def build(root, output, check_audio=True):
             contents.append(f"<h2>{html.escape(section)}</h2>")
         for _, _, _, chapter in sorted((c for c in chapters if c[0] == section), key=lambda c: c[2]):
             contents.append(f"<details><summary>{chapter.front}</summary>{chapter.back}</details>")
-    write(root / "reports/provenance.json", evidence)
+    write(pending / "provenance.json", evidence)
     # CSP keeps authored preview content offline even before import into LingoDeck.
     preview_html = (
         "<!doctype html><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; base-uri 'none'\"><title>Deck review</title><style>"
@@ -205,7 +293,7 @@ def build(root, output, check_audio=True):
         + "</h1>"
         + preview_media("".join(contents + preview))
     )
-    (root / "reports/preview.html").write_text(preview_html, encoding="utf-8")
+    (pending / "preview.html").write_text(preview_html, encoding="utf-8")
     result = {
         "output": str(output.resolve()),
         "notes": len(expected),
@@ -213,6 +301,8 @@ def build(root, output, check_audio=True):
         "media_files": len(media),
         "qa": report,
         "project_uid": config.uid,
+        "release_time": release_time,
+        "note_modifications": modifications,
         "note_fingerprints": fingerprints,
         "note_changes": None
         if previous is None
@@ -225,5 +315,7 @@ def build(root, output, check_audio=True):
         },
         "manual_review": "Not automatically asserted: open preview, listen, check Anki/LingoDeck",
     }
-    write(root / "reports/release.json", result)
-    return {key: value for key, value in result.items() if key != "note_fingerprints"}
+    write(pending / "release.json", result)
+    return {
+        key: value for key, value in result.items() if key not in {"note_fingerprints", "note_modifications"}
+    }
